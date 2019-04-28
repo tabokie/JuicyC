@@ -19,7 +19,16 @@ unittest:
   $(CC) /Feunittest.exe $(INCLUDE_FLAG) $(TEST_LIB) $(SRC) test/*.cc $(FLAG) $(TEST_FLAG)
 .PHONY : unittest
 
+fallback_build:
+  g++ -o juicyc -std=gnu++11 -I. -I./include $(SRC)
+.PHONY : fallback_unittest
+
+fallback_unittest:
+  g++ -o unittest -static -std=gnu++11 -I. -I./include $(SRC) test/*.cc -lgtest -lpthread
+.PHONY : fallback_unittest
+
 clean:
   $(SHELL_DEL) *.exe
   $(SHELL_DEL) *.obj
+  $(SHELL_DEL) *.o
 .PHONY : clean

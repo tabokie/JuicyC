@@ -48,7 +48,7 @@ Status SequentialFile::Read(size_t offset, size_t size, char* alloc_ptr){
     0); // 0 for starting from beginning
   DWORD dwError;
   if(dwPtr == INVALID_SET_FILE_POINTER \
-      && (dwError = GetLastError())!=NO_ERROR)
+      && (dwError = GetLastError()) != 0)
     return Status::IOError("Set File Pointer Failed");
   DWORD numByteRead;
   bool rfRes = ReadFile(fhandle_, 
@@ -71,7 +71,7 @@ Status SequentialFile::Write(size_t offset, size_t size, const char* data_ptr) {
     0); // 0 for starting from beginning
   DWORD dwError;
   if(dwPtr == INVALID_SET_FILE_POINTER \
-      && (dwError = GetLastError())!=NO_ERROR)
+      && (dwError = GetLastError()) != 0)
     return Status::IOError("Set File Pointer Failed");
   DWORD numByteWritten;
   bool rfRes = WriteFile(fhandle_, 
@@ -94,7 +94,7 @@ Status SequentialFile::SetEnd(size_t offset) {
     0); // 0 for starting from beginning
   DWORD dwError;
   if(dwPtr == INVALID_SET_FILE_POINTER \
-      && (dwError = GetLastError())!=NO_ERROR)
+      && (dwError = GetLastError()) != 0)
     return Status::IOError("Set File Pointer Failed");
   SetEndOfFile(fhandle_);
   file_end_ = offset;
