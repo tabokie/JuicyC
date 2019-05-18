@@ -1,5 +1,5 @@
-#ifndef JUICYC_STATUS_HPP_
-#define JUICYC_STATUS_HPP_
+#ifndef JUICYC_STATUS_H_
+#define JUICYC_STATUS_H_
 
 #include <string>
 #include <cassert>
@@ -174,4 +174,4 @@ inline void Status::operator=(const Status& s) {
 
 }  // namespace juicyc
 
-#endif  // JUICYC_STATUS_HPP_
+#endif  // JUICYC_STATUS_H_
