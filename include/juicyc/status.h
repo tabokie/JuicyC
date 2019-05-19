@@ -1,6 +1,7 @@
 #ifndef JUICYC_STATUS_H_
 #define JUICYC_STATUS_H_
 
+#include <cstring>
 #include <string>
 #include <cassert>
 #include <iostream>

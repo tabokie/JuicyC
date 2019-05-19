@@ -1,7 +1,6 @@
 %{
 #include <cstdlib>
 #include <cstdio>
-#include "juicyc/symbol.h"
 void yyerror(const char *s);
 int yylex();
 %}

@@ -10,7 +10,7 @@ IS          ((u|U)|(u|U)?(l|L|ll|LL)|(l|L|ll|LL)(u|U))
 #include <cstdio>
 #include <iostream>
 #include "parse.hh"
-#include "env.h"
+#include "front_env.h"
 #include "juicyc/symbol.h"
 
 using namespace juicyc;
@@ -26,8 +26,8 @@ uint16_t file = 0;
 #define YY_INPUT(buf, result, max_size)  \
   result = 0; \
   while (1) { \
-    int c = Env::pp->get(); \
-    if (Env::pp->eof()) { \
+    int c = FrontEnv::pp->get(); \
+    if (FrontEnv::pp->eof()) { \
       break; \
     } \
     buf[result++] = c; \

@@ -41,7 +41,7 @@ extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
 /* Line 2058 of yacc.c  */
-#line 10 "./frontend/c.y"
+#line 9 "./frontend/c.y"
 
 #include "juicyc/symbol.h"
 
@@ -125,7 +125,7 @@ extern int yydebug;
 typedef union YYSTYPE
 {
 /* Line 2058 of yacc.c  */
-#line 14 "./frontend/c.y"
+#line 13 "./frontend/c.y"
 
 	juicyc::Symbol* sym;
 

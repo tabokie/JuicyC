@@ -1,6 +1,8 @@
 #ifndef JUICYC_PREPROCESSOR_H_
 #define JUICYC_PREPROCESSOR_H_
 
+#include "compiler.h"
+
 #include <memory>
 
 namespace juicyc {
@@ -17,7 +19,7 @@ class Preprocessor {
  	// task scheduler
  	virtual void push(std::string& file) = 0;
  	static std::unique_ptr<Preprocessor>
- 	NewPreprocessor();
+ 	NewPreprocessor(CompilerOption& opt);
 };
 
 } // namespace juicyc

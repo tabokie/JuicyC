@@ -1,6 +1,5 @@
 # this makefile is tuned for Microsoft nmake build tool
 # with no wildcard capture
-
 SHELL_DEL = del
 CC = cl
 # careful not to override existing variable
@@ -9,7 +8,7 @@ FLAG = /EHsc
 TEST_FLAG = /link /subsystem:console
 
 TEST_LIB = gtest.lib gtest_main.lib
-SRC = frontend/*.cc util/*.cc
+SRC = frontend/*.cc util/*.cc cmd/*.cc include/juicyc/*.cc
 # pp/*.cc backend/*.cc asm/*.cc
 
 # to fix `spawn failed error` for now
