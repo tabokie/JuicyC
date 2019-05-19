@@ -1,4 +1,4 @@
-# JuicyC
+# 123
 C compiler for fun
 
 ## Dependency
