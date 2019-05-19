@@ -1,6 +1,6 @@
 # this makefile is tuned for Microsoft nmake build tool
 # with no wildcard capture
-
+# author: PYL
 SHELL_DEL = del
 CC = cl
 # careful not to override existing variable
