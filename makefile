@@ -8,18 +8,19 @@ FLAG = /EHsc
 TEST_FLAG = /link /subsystem:console
 
 TEST_LIB = gtest.lib gtest_main.lib
-SRC = frontend/*.cc util/*.cc cmd/*.cc include/juicyc/*.cc
+SRC = frontend/*.cc util/*.cc include/juicyc/*.cc
+CMD = cmd/*.cc
 # pp/*.cc backend/*.cc asm/*.cc
 
 # to fix `spawn failed error` for now
 LEX = start ./bin/win_flex_bison/win_flex.exe
 YACC = start ./bin/win_flex_bison/win_bison.exe
 
-all: build unittest gen
+all: gen unittest build
 .PHONY : all
 
 build:
-  $(CC) /Fejuicyc.exe $(INCLUDE_FLAG) $(SRC) $(FLAG)
+  $(CC) /Fejuicyc.exe $(INCLUDE_FLAG) $(SRC) $(CMD) $(FLAG)
 .PHONY : build
 
 unittest:
@@ -30,7 +31,7 @@ mingw: fallback_build fallback_unittest
 .PHONY : mingw
 
 fallback_build:
-  g++ -o juicyc -std=gnu++11 -I. -I./include $(SRC)
+  g++ -o juicyc -std=gnu++11 -I. -I./include $(SRC) $(CMD)
 .PHONY : fallback_unittest
 
 fallback_unittest:

@@ -4,3 +4,6 @@
 *tmp*
 *.draft
 bin
+*.a
+*.lib
+*.dll
