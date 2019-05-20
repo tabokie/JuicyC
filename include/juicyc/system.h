@@ -34,6 +34,10 @@ class OutputSystem : public NoCopy {
   virtual OStreamPtr fopen(const std::string& file) {
     return std::move(MakeStream(std::ofstream(file)));
   }
+  virtual void fclose(OStreamPtr& p) {
+    p.release();
+    return ;
+  }
 };
 
 } // namespace jjicyc
