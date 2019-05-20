@@ -35,7 +35,7 @@ fallback_build:
 .PHONY : fallback_unittest
 
 fallback_unittest:
-  g++ -o unittest -static -std=gnu++11 -I. -I./include $(SRC) test/*.cc -lgtest -lpthread
+  g++ -o unittest -static -std=gnu++14 -I. -I./include $(SRC) test/*.cc -lgtest -lpthread
 .PHONY : fallback_unittest
 
 gen:
