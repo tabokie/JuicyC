@@ -18,10 +18,8 @@ class Preprocessor {
  	virtual uint32_t col_no() const = 0;
  	// task scheduler
  	virtual void push(std::string& file) = 0;
- 	static std::unique_ptr<Preprocessor>
- 	NewPreprocessor(CompilerOption& opt);
+ 	static std::unique_ptr<Preprocessor> NewPreprocessor(CompilerOption& opt);
 };
 
 } // namespace juicyc
-
 #endif // JUICYC_PREPROCESSOR_H_
