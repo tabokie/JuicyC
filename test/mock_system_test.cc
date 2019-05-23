@@ -18,7 +18,6 @@ TEST(MockSystemTest, BasicRead) {
 	EXPECT_EQ(std::string(buf), std::string("hello world"));
 }
 
-
 TEST(MockSystemTest, BasicWrite) {
 	MockOutputSystem sys;
 	juicyc::OStreamPtr s(sys.fopen("test_file.b"));

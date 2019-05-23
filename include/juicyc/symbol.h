@@ -17,6 +17,16 @@ struct Symbol {
     delete right;
   }
   virtual void Invoke(SymbolVisitor& visitor);
+  // helper function
+  static void MakeSibling(Symbol* head, Symbol* tail, Symbol*... siblings) {
+    head->left = tail;
+    tail->right = head;
+    MakeSibling(tail, siblings...)
+  }
+  static void MakeSibling(Symbol* head, Symbol* tail) {
+    head->left = tail;
+    tail->right = head;
+  }
 };
 
 struct Terminal : public Symbol {

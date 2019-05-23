@@ -62,7 +62,12 @@ int yylex();
 %%
 
 primary_expression
-	: IDENTIFIER
+	: IDENTIFIER {
+		NonTerminal* tmp = new Expression();
+		tmp->type = FrontEnv::Tag("primary_expression");
+		tmp->childs = $1;
+		$$ = tmp;
+	}
 	| CONSTANT
 	| STRING_LITERAL
 	| '(' expression ')'
@@ -70,7 +75,13 @@ primary_expression
 
 postfix_expression
 	: primary_expression
-	| postfix_expression '[' expression ']'
+	| postfix_expression '[' expression ']' {
+		NonTerminal* tmp = new Expression();
+		tmp->type = FrontEnv::Tag("postfix_expression");
+		tmp->childs = $1;
+		Symbol::MakeSibling($1, $2, $3, $4);
+		$$ = tmp;
+	}
 	| postfix_expression '(' ')'
 	| postfix_expression '(' argument_expression_list ')'
 	| postfix_expression '.' IDENTIFIER
