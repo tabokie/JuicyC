@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <map>
 
 namespace juicyc {
 
@@ -27,8 +28,7 @@ class Compiler {
   virtual Status Parse() = 0;
   virtual Status GenerateIR() = 0;
   virtual Status GenerateAsm() = 0;
-  static std::unique_ptr<Compiler>
-  NewCompiler(CompilerOption& option);
+  static std::unique_ptr<Compiler> NewCompiler(CompilerOption& option);
 };
 
 } // namespace juicyc
