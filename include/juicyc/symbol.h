@@ -22,7 +22,7 @@ struct Symbol {
   static void MakeSibling(Symbol* head, Symbol* tail, Args... siblings) {
     head->left = tail;
     tail->right = head;
-    MakeSibling(tail, siblings...)
+    MakeSibling(tail, siblings...);
   }
   static void MakeSibling(Symbol* head, Symbol* tail) {
     head->left = tail;

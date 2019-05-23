@@ -1,8 +1,14 @@
 %{
 #include <cstdlib>
 #include <cstdio>
+#include "front_env.h"
+
 void yyerror(const char *s);
 int yylex();
+
+using juicyc::Symbol;
+using juicyc::NonTerminal;
+using juicyc::FrontEnv;
 %}
 
 // included in header
@@ -65,7 +71,7 @@ int yylex();
 
 primary_expression
 	: IDENTIFIER {
-		NonTerminal* tmp = new Expression();
+		NonTerminal* tmp = new NonTerminal();
 		tmp->type = FrontEnv::Tag("primary_expression");
 		tmp->childs = $1;
 		$$ = tmp;
@@ -78,7 +84,7 @@ primary_expression
 postfix_expression
 	: primary_expression
 	| postfix_expression '[' expression ']' {
-		NonTerminal* tmp = new Expression();
+		NonTerminal* tmp = new NonTerminal();
 		tmp->type = FrontEnv::Tag("postfix_expression");
 		tmp->childs = $1;
 		Symbol::MakeSibling($1, $2, $3, $4);

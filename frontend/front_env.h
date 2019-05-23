@@ -5,7 +5,7 @@
 #include "util/unique_symtable.h"
 #include "juicyc/status.h"
 #include "juicyc/preprocessor.h"
-#include "parse.hh"
+#include "gen_parse.hh"
 
 namespace juicyc {
 
@@ -14,15 +14,18 @@ namespace juicyc {
 // runtime operation.
 class FrontEnv : public NoMove {
  protected:
- 	static UniqueSymtable tagger_;
+  static UniqueSymtable tagger_;
  public:
- 	static std::unique_ptr<Preprocessor> pp;
- 	static uint16_t Tag(std::string& key) {
- 		return tagger_.Insert(key);
- 	}
- 	static Status Parse() {
- 		yyparse();
- 	}
+  static std::unique_ptr<Preprocessor> pp;
+  static uint16_t Tag(std::string& key) {
+    return tagger_.Insert(key);
+  }
+  static uint16_t Tag(const char* key) {
+    return tagger_.Insert(std::string(key));
+  }
+  static Status Parse() {
+    yyparse();
+  }
 };
 
 } // namespace juicyc
