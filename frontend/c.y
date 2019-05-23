@@ -19,6 +19,8 @@ int yylex();
 %token <sym> AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
 %token <sym> SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
 %token <sym> XOR_ASSIGN OR_ASSIGN TYPE_NAME
+%token <sym> ';' '{' '}' ',' ':' '=' '(' ')' '[' ']' '.' '&' '!' '~' '-'
+%token <sym> '+' '*' '/' '%' '<' '>' '^' '|' '?'
 
 %token <sym> TYPEDEF EXTERN STATIC AUTO REGISTER INLINE RESTRICT
 /* due to built-in macro on c-type,

@@ -39,8 +39,8 @@ fallback_unittest:
 .PHONY : fallback_unittest
 
 gen:
-	$(LEX) -o./frontend/scan.cc --wincompat ./frontend/c.l
-	$(YACC) -d -o./frontend/parse.cc ./frontend/c.y
+	$(LEX) -o./frontend/gen_scan.cc --wincompat ./frontend/c.l
+	$(YACC) -d -o./frontend/gen_parse.cc ./frontend/c.y
 .PHONY : gen
 
 clean:

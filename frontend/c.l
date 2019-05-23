@@ -9,7 +9,7 @@ IS          ((u|U)|(u|U)?(l|L|ll|LL)|(l|L|ll|LL)(u|U))
 %{
 #include <cstdio>
 #include <iostream>
-#include "parse.hh"
+#include "gen_parse.hh"
 #include "front_env.h"
 #include "juicyc/symbol.h"
 

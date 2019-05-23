@@ -18,7 +18,8 @@ struct Symbol {
   }
   virtual void Invoke(SymbolVisitor& visitor);
   // helper function
-  static void MakeSibling(Symbol* head, Symbol* tail, Symbol*... siblings) {
+  template <class ...Args>
+  static void MakeSibling(Symbol* head, Symbol* tail, Args... siblings) {
     head->left = tail;
     tail->right = head;
     MakeSibling(tail, siblings...)

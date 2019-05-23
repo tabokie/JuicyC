@@ -7,3 +7,4 @@ bin
 *.a
 *.lib
 *.dll
+gen*
