@@ -1,17 +1,16 @@
 #include <gtest/gtest.h>
 
-#include "mock_system.h"
+#include "mock_env.h"
 #include "juicyc/system.h"
 
 #include <istream>
 
-using juicyc::test::MockInputSystem;
-using juicyc::test::MockOutputSystem;
+using namespace juicyc;
 
 TEST(MockSystemTest, BasicRead) {
-	MockInputSystem sys;
+	test::MockInputSystem sys;
 	sys.set_file("test_file.a", "hello world");
-	juicyc::IStreamPtr s (sys.fopen("test_file.a"));
+	IStreamPtr s (sys.fopen("test_file.a"));
 	char buf[20];
 	memset(buf, 0, sizeof(char) * 20);
 	s->getline(buf, 20);
@@ -19,9 +18,10 @@ TEST(MockSystemTest, BasicRead) {
 }
 
 TEST(MockSystemTest, BasicWrite) {
-	MockOutputSystem sys;
-	juicyc::OStreamPtr s(sys.fopen("test_file.b"));
+	test::MockOutputSystem sys;
+	OStreamPtr s(sys.fopen("test_file.b"));
 	(*s) << "hello world";
 	sys.fclose(s);
+	s.release();
 	EXPECT_EQ(sys.get_file("test_file.b"), "hello world");
 }

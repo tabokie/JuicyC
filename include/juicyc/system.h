@@ -7,6 +7,7 @@
 #include <ostream>
 #include <fstream>
 #include <memory>
+#include <functional>
 
 namespace juicyc {
 
@@ -35,7 +36,6 @@ class OutputSystem : public NoCopy {
     return std::move(MakeStream(std::ofstream(file)));
   }
   virtual void fclose(OStreamPtr& p) {
-    p.release();
     return ;
   }
 };

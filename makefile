@@ -8,9 +8,9 @@ FLAG = /EHsc
 TEST_FLAG = /link /subsystem:console
 
 TEST_LIB = gtest.lib gtest_main.lib
-SRC = frontend/*.cc util/*.cc include/juicyc/*.cc
+SRC = frontend/*.cc util/*.cc include/juicyc/*.cc pp/*.cc
 CMD = cmd/*.cc
-# pp/*.cc backend/*.cc asm/*.cc
+# backend/*.cc asm/*.cc
 
 # to fix `spawn failed error` for now
 LEX = start ./bin/win_flex_bison/win_flex.exe
