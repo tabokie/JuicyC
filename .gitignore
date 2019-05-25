@@ -8,3 +8,4 @@ bin
 *.lib
 *.dll
 gen*
+.DS_Store
