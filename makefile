@@ -1,20 +1,26 @@
-# this makefile is tuned for Microsoft nmake build tool
-# with no wildcard capture
+# this makefile is tuned for Microsoft nmake build tool.
+# dependent on win-flex-bison and llvm.
+
 SHELL_DEL = del
 CC = cl
 # careful not to override existing variable
 INCLUDE_FLAG = /I ./include /I .
-FLAG = /EHsc
+LLVM_PATH = ./bin/llvm
+WIN_FLEX_BISON_PATH = ./bin/win_flex_bison
+# build by dynamic link
+FLAG = /EHsc /MD
 TEST_FLAG = /link /subsystem:console
 
-TEST_LIB = gtest.lib gtest_main.lib
+# llvm library should include gtest
+# TEST_LIB = gtest.lib gtest_main.lib
+LLVM_LIB = $(LLVM_PATH)/lib/*.lib
 SRC = frontend/*.cc util/*.cc include/juicyc/*.cc pp/*.cc
 CMD = cmd/*.cc
 # backend/*.cc asm/*.cc
 
 # to fix `spawn failed error` for now
-LEX = start ./bin/win_flex_bison/win_flex.exe
-YACC = start ./bin/win_flex_bison/win_bison.exe
+LEX = start $(WIN_FLEX_BISON_PATH)/win_flex.exe
+YACC = start $(WIN_FLEX_BISON_PATH)/win_bison.exe
 
 all: gen unittest build
 .PHONY : all
@@ -24,7 +30,7 @@ build:
 .PHONY : build
 
 unittest:
-  $(CC) /Feunittest.exe $(INCLUDE_FLAG) $(TEST_LIB) $(SRC) test/*.cc $(FLAG) $(TEST_FLAG)
+  $(CC) /Feunittest.exe $(INCLUDE_FLAG) $(TEST_LIB) $(LLVM_LIB) $(SRC) test/*.cc $(FLAG) $(TEST_FLAG)
 .PHONY : unittest
 
 mingw: fallback_build fallback_unittest
