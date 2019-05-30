@@ -19,7 +19,7 @@ class PreprocessorImpl: public Preprocessor {
         buffer_(buffer_init_size_, '\0') {}
   ~PreprocessorImpl() {}
 
-  // eof is only set when a get returns '\0'
+  // eof is only set after a get returns '\0'
   bool eof() const { return eof_; }
   bool good() const { return !eof_ && status_.ok(); }
   bool ok() const { return status_.ok(); }

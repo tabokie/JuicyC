@@ -16,7 +16,7 @@ struct Symbol {
   ~Symbol() {
     delete right;
   }
-  virtual void Invoke(SymbolVisitor& visitor);
+  virtual void Invoke(SymbolVisitor& visitor) = 0;
   // helper function
   template <class ...Args>
   static void MakeSibling(Symbol* head, Symbol* tail, Args... siblings) {
@@ -38,7 +38,7 @@ struct Terminal : public Symbol {
   uint32_t col;
   Terminal() : Symbol(true) { }
   ~Terminal() { }
-  virtual void Invoke(SymbolVisitor& visitor) {
+  virtual void Invoke(SymbolVisitor& visitor) override {
     visitor.VisitTerminal(this);
     visitor.ExitTerminal(this);
   }
@@ -50,7 +50,7 @@ struct NonTerminal : public Symbol {
   ~NonTerminal() {
     delete childs;
   }
-  virtual void Invoke(SymbolVisitor& visitor) {
+  virtual void Invoke(SymbolVisitor& visitor) override {
     visitor.VisitNonTerminal(this);
     if(childs)
       childs->Invoke(visitor);

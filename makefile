@@ -14,7 +14,7 @@ TEST_FLAG = /link /subsystem:console
 # llvm library should include gtest
 # TEST_LIB = gtest.lib gtest_main.lib
 LLVM_LIB = $(LLVM_PATH)/lib/*.lib
-SRC = frontend/*.cc util/*.cc include/juicyc/*.cc pp/*.cc
+SRC = frontend/*.cc util/*.cc pp/*.cc
 CMD = cmd/*.cc
 # backend/*.cc asm/*.cc
 

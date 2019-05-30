@@ -9,6 +9,24 @@ int yylex();
 using juicyc::Symbol;
 using juicyc::NonTerminal;
 using juicyc::FrontEnv;
+
+template <typename SymType, typename YaccType, class ...YaccChild>
+void BUILD(std::string& name, YaccType& root, YaccType& first, YaccChild... childs) {
+  SymType *tmp = new SymType();
+  tmp->type = FrontEnv::Tag(name);
+  tmp->childs = first;
+  Symbol::MakeSibling(first, childs...);
+  root = tmp;
+}
+
+template <typename SymType, typename YaccType>
+void BUILD(std::string& name, YaccType& root, YaccType& child) {
+  SymType *tmp = new SymType();
+  tmp->type = FrontEnv::Tag(name);
+  tmp->childs = child;
+  root = tmp;
+}
+
 %}
 
 // included in header
@@ -17,7 +35,7 @@ using juicyc::FrontEnv;
 }
 
 %union{
-	juicyc::Symbol* sym;
+  juicyc::Symbol* sym;
 }
 
 %token <sym> IDENTIFIER CONSTANT STRING_LITERAL SIZEOF
@@ -70,457 +88,445 @@ using juicyc::FrontEnv;
 %%
 
 primary_expression
-	: IDENTIFIER {
-		NonTerminal* tmp = new NonTerminal();
-		tmp->type = FrontEnv::Tag("primary_expression");
-		tmp->childs = $1;
-		$$ = tmp;
-	}
-	| CONSTANT
-	| STRING_LITERAL
-	| '(' expression ')'
-	;
+  : IDENTIFIER {   NonTerminal* tmp = new NonTerminal(); tmp->type = FrontEnv::Tag("primary_expression"); tmp->childs = $1; $$ = tmp;}
+  | CONSTANT {BUILD<NonTerminal>("primary_expression", $$, $1);}
+  | STRING_LITERAL {BUILD<NonTerminal>("primary_expression", $$, $1);}
+  | '(' expression ')' {BUILD<NonTerminal>("primary_expression", $$, $1, $2, $3);}
+  ;
 
 postfix_expression
-	: primary_expression
-	| postfix_expression '[' expression ']' {
-		NonTerminal* tmp = new NonTerminal();
-		tmp->type = FrontEnv::Tag("postfix_expression");
-		tmp->childs = $1;
-		Symbol::MakeSibling($1, $2, $3, $4);
-		$$ = tmp;
-	}
-	| postfix_expression '(' ')'
-	| postfix_expression '(' argument_expression_list ')'
-	| postfix_expression '.' IDENTIFIER
-	| postfix_expression PTR_OP IDENTIFIER
-	| postfix_expression INC_OP
-	| postfix_expression DEC_OP
-	| '(' type_name ')' '{' initializer_list '}'
-	| '(' type_name ')' '{' initializer_list ',' '}'
-	;
+  : primary_expression {BUILD<NonTerminal>("postfix_expression", $$, $1);}
+  | postfix_expression '[' expression ']' {BUILD<NonTerminal>("postfix_expression", $$, $1, $2, $3, $4);}
+  | postfix_expression '(' ')' {BUILD<NonTerminal>("postfix_expression", $$, $1, $2, $3);}
+  | postfix_expression '(' argument_expression_list ')' {BUILD<NonTerminal>("postfix_expression", $$, $1, $2, $3, $4);}
+  | postfix_expression '.' IDENTIFIER {BUILD<NonTerminal>("postfix_expression", $$, $1, $2, $3);}
+  | postfix_expression PTR_OP IDENTIFIER {BUILD<NonTerminal>("postfix_expression", $$, $1, $2, $3);}
+  | postfix_expression INC_OP {BUILD<NonTerminal>("postfix_expression", $$, $1, $2);}
+  | postfix_expression DEC_OP {BUILD<NonTerminal>("postfix_expression", $$, $1, $2);}
+  | '(' type_name ')' '{' initializer_list '}' {BUILD<NonTerminal>("postfix_expression", $$, $1, $2, $3, $4, $5, $6);}
+  | '(' type_name ')' '{' initializer_list ',' '}' {BUILD<NonTerminal>("postfix_expression", $$, $1, $2, $3, $4, $5, $7);}
+  ;
 
 argument_expression_list
-	: assignment_expression
-	| argument_expression_list ',' assignment_expression
-	;
+  : assignment_expression {BUILD<NonTerminal>("argument_expression_list", $$, $1);}
+  | argument_expression_list ',' assignment_expression {BUILD<NonTerminal>("argument_expression_list", $$, $1, $2, $3);}
+  ;
 
 unary_expression
-	: postfix_expression
-	| INC_OP unary_expression
-	| DEC_OP unary_expression
-	| unary_operator cast_expression
-	| SIZEOF unary_expression
-	| SIZEOF '(' type_name ')'
-	;
+  : postfix_expression {BUILD<NonTerminal>("unary_expression", $$, $1);}
+  | INC_OP unary_expression {BUILD<NonTerminal>("unary_expression", $$, $1, $2);}
+  | DEC_OP unary_expression {BUILD<NonTerminal>("unary_expression", $$, $1, $2);}
+  | unary_operator cast_expression {BUILD<NonTerminal>("unary_expression", $$, $1, $2);}
+  | SIZEOF unary_expression {BUILD<NonTerminal>("unary_expression", $$, $1, $2);}
+  | SIZEOF '(' type_name ')' {BUILD<NonTerminal>("unary_expression", $$, $1, $2, $3, $4);}
+  ;
 
 unary_operator
-	: '&'
-	| '*'
-	| '+'
-	| '-'
-	| '~'
-	| '!'
-	;
+  : '&' {BUILD<NonTerminal>("unary_operator", $$, $1);}
+  | '*' {BUILD<NonTerminal>("unary_operator", $$, $1);}
+  | '+' {BUILD<NonTerminal>("unary_operator", $$, $1);}
+  | '-' {BUILD<NonTerminal>("unary_operator", $$, $1);}
+  | '~' {BUILD<NonTerminal>("unary_operator", $$, $1);}
+  | '!' {BUILD<NonTerminal>("unary_operator", $$, $1);}
+  ;
 
 cast_expression
-	: unary_expression
-	| '(' type_name ')' cast_expression
-	;
+  : unary_expression {BUILD<NonTerminal>("cast_expression", $$, $1);}
+  | '(' type_name ')' cast_expression {BUILD<NonTerminal>("cast_expression", $$, $1, $2, $3, $4);}
+  ;
 
 multiplicative_expression
-	: cast_expression
-	| multiplicative_expression '*' cast_expression
-	| multiplicative_expression '/' cast_expression
-	| multiplicative_expression '%' cast_expression
-	;
+  : cast_expression {BUILD<NonTerminal>("multiplicative_expression", $$, $1);}
+  | multiplicative_expression '*' cast_expression {BUILD<NonTerminal>("multiplicative_expression", $$, $1, $2, $3);}
+  | multiplicative_expression '/' cast_expression {BUILD<NonTerminal>("multiplicative_expression", $$, $1, $2, $3);}
+  | multiplicative_expression '%' cast_expression {BUILD<NonTerminal>("multiplicative_expression", $$, $1, $2, $3);}
+  ;
 
 additive_expression
-	: multiplicative_expression
-	| additive_expression '+' multiplicative_expression
-	| additive_expression '-' multiplicative_expression
-	;
+  : multiplicative_expression {BUILD<NonTerminal>("additive_expression", $$, $1);}
+  | additive_expression '+' multiplicative_expression {BUILD<NonTerminal>("additive_expression", $$, $1, $2, $3);}
+  | additive_expression '-' multiplicative_expression {BUILD<NonTerminal>("additive_expression", $$, $1, $2, $3);}
+  ;
 
 shift_expression
-	: additive_expression
-	| shift_expression LEFT_OP additive_expression
-	| shift_expression RIGHT_OP additive_expression
-	;
+  : additive_expression {BUILD<NonTerminal>("shift_expression", $$, $1);}
+  | shift_expression LEFT_OP additive_expression {BUILD<NonTerminal>("shift_expression", $$, $1, $2, $3);}
+  | shift_expression RIGHT_OP additive_expression {BUILD<NonTerminal>("shift_expression", $$, $1, $2, $3);}
+  ;
 
 relational_expression
-	: shift_expression
-	| relational_expression '<' shift_expression
-	| relational_expression '>' shift_expression
-	| relational_expression LE_OP shift_expression
-	| relational_expression GE_OP shift_expression
-	;
+  : shift_expression {BUILD<NonTerminal>("relational_expression", $$, $1);}
+  | relational_expression '<' shift_expression {BUILD<NonTerminal>("relational_expression", $$, $1, $2, $3);}
+  | relational_expression '>' shift_expression {BUILD<NonTerminal>("relational_expression", $$, $1, $2, $3);}
+  | relational_expression LE_OP shift_expression {BUILD<NonTerminal>("relational_expression", $$, $1, $2, $3);}
+  | relational_expression GE_OP shift_expression {BUILD<NonTerminal>("relational_expression", $$, $1, $2, $3);}
+  ;
 
 equality_expression
-	: relational_expression
-	| equality_expression EQ_OP relational_expression
-	| equality_expression NE_OP relational_expression
-	;
+  : relational_expression {BUILD<NonTerminal>("equality_expression", $$, $1);}
+  | equality_expression EQ_OP relational_expression {BUILD<NonTerminal>("equality_expression", $$, $1, $2, $3);}
+  | equality_expression NE_OP relational_expression {BUILD<NonTerminal>("equality_expression", $$, $1, $2, $3);}
+  ;
 
 and_expression
-	: equality_expression
-	| and_expression '&' equality_expression
-	;
+  : equality_expression {BUILD<NonTerminal>("and_expression", $$, $1);}
+  | and_expression '&' equality_expression {BUILD<NonTerminal>("and_expression", $$, $1, $2, $3);}
+  ;
 
 exclusive_or_expression
-	: and_expression
-	| exclusive_or_expression '^' and_expression
-	;
+  : and_expression {BUILD<NonTerminal>("exclusive_or_expression", $$, $1);}
+  | exclusive_or_expression '^' and_expression {BUILD<NonTerminal>("exclusive_or_expression", $$, $1, $2, $3);}
+  ;
 
 inclusive_or_expression
-	: exclusive_or_expression
-	| inclusive_or_expression '|' exclusive_or_expression
-	;
+  : exclusive_or_expression {BUILD<NonTerminal>("inclusive_or_expression", $$, $1);}
+  | inclusive_or_expression '|' exclusive_or_expression {BUILD<NonTerminal>("inclusive_or_expression", $$, $1, $2, $3);}
+  ;
 
 logical_and_expression
-	: inclusive_or_expression
-	| logical_and_expression AND_OP inclusive_or_expression
-	;
+  : inclusive_or_expression {BUILD<NonTerminal>("logical_and_expression", $$, $1);}
+  | logical_and_expression AND_OP inclusive_or_expression {BUILD<NonTerminal>("logical_and_expression", $$, $1, $2, $3);}
+  ;
 
 logical_or_expression
-	: logical_and_expression
-	| logical_or_expression OR_OP logical_and_expression
-	;
+  : logical_and_expression {BUILD<NonTerminal>("logical_or_expression", $$, $1);}
+  | logical_or_expression OR_OP logical_and_expression {BUILD<NonTerminal>("logical_or_expression", $$, $1, $2, $3);}
+  ;
 
 conditional_expression
-	: logical_or_expression
-	| logical_or_expression '?' expression ':' conditional_expression
-	;
+  : logical_or_expression {BUILD<NonTerminal>("conditional_expression", $$, $1);}
+  | logical_or_expression '?' expression ':' conditional_expression {BUILD<NonTerminal>("conditional_expression", $$, $1, $2, $3, $4, $5);}
+  ;
 
 assignment_expression
-	: conditional_expression
-	| unary_expression assignment_operator assignment_expression
-	;
+  : conditional_expression {BUILD<NonTerminal>("assignment_expression", $$, $1);}
+  | unary_expression assignment_operator assignment_expression {BUILD<NonTerminal>("assignment_expression", $$, $1, $2, $3);}
+  ;
 
 assignment_operator
-	: '='
-	| MUL_ASSIGN
-	| DIV_ASSIGN
-	| MOD_ASSIGN
-	| ADD_ASSIGN
-	| SUB_ASSIGN
-	| LEFT_ASSIGN
-	| RIGHT_ASSIGN
-	| AND_ASSIGN
-	| XOR_ASSIGN
-	| OR_ASSIGN
-	;
+  : '=' {BUILD<NonTerminal>("assignment_operator", $$, $1);}
+  | MUL_ASSIGN {BUILD<NonTerminal>("assignment_operator", $$, $1);}
+  | DIV_ASSIGN {BUILD<NonTerminal>("assignment_operator", $$, $1);}
+  | MOD_ASSIGN {BUILD<NonTerminal>("assignment_operator", $$, $1);}
+  | ADD_ASSIGN {BUILD<NonTerminal>("assignment_operator", $$, $1);}
+  | SUB_ASSIGN {BUILD<NonTerminal>("assignment_operator", $$, $1);}
+  | LEFT_ASSIGN {BUILD<NonTerminal>("assignment_operator", $$, $1);}
+  | RIGHT_ASSIGN {BUILD<NonTerminal>("assignment_operator", $$, $1);}
+  | AND_ASSIGN {BUILD<NonTerminal>("assignment_operator", $$, $1);}
+  | XOR_ASSIGN {BUILD<NonTerminal>("assignment_operator", $$, $1);}
+  | OR_ASSIGN {BUILD<NonTerminal>("assignment_operator", $$, $1);}
+  ;
 
 expression
-	: assignment_expression
-	| expression ',' assignment_expression
-	;
+  : assignment_expression {BUILD<NonTerminal>("expression", $$, $1);}
+  | expression ',' assignment_expression {BUILD<NonTerminal>("expression", $$, $1, $2, $3);}
+  ;
 
 constant_expression
-	: conditional_expression
-	;
+  : conditional_expression {BUILD<NonTerminal>("constant_expression", $$, $1);}
+  ;
 
 declaration
-	: declaration_specifiers ';'
-	| declaration_specifiers init_declarator_list ';'
-	;
+  : declaration_specifiers ';' {BUILD<NonTerminal>("declaration", $$, $1, $2);}
+  | declaration_specifiers init_declarator_list ';' {BUILD<NonTerminal>("declaration", $$, $1, $2, $3);}
+  ;
 
 declaration_specifiers
-	: storage_class_specifier
-	| storage_class_specifier declaration_specifiers
-	| type_specifier
-	| type_specifier declaration_specifiers
-	| type_qualifier
-	| type_qualifier declaration_specifiers
-	| function_specifier
-	| function_specifier declaration_specifiers
-	;
+  : storage_class_specifier {BUILD<NonTerminal>("declaration_specifiers", $$, $1);}
+  | storage_class_specifier declaration_specifiers {BUILD<NonTerminal>("declaration_specifiers", $$, $1, $2);}
+  | type_specifier {BUILD<NonTerminal>("declaration_specifiers", $$, $1);}
+  | type_specifier declaration_specifiers {BUILD<NonTerminal>("declaration_specifiers", $$, $1, $2);}
+  | type_qualifier {BUILD<NonTerminal>("declaration_specifiers", $$, $1);}
+  | type_qualifier declaration_specifiers {BUILD<NonTerminal>("declaration_specifiers", $$, $1, $2);}
+  | function_specifier {BUILD<NonTerminal>("declaration_specifiers", $$, $1);}
+  | function_specifier declaration_specifiers {BUILD<NonTerminal>("declaration_specifiers", $$, $1, $2);}
+  ;
 
 init_declarator_list
-	: init_declarator
-	| init_declarator_list ',' init_declarator
-	;
+  : init_declarator {BUILD<NonTerminal>("init_declarator_list", $$, $1);}
+  | init_declarator_list ',' init_declarator {BUILD<NonTerminal>("init_declarator_list", $$, $1, $2, $3);}
+  ;
 
 init_declarator
-	: declarator
-	| declarator '=' initializer
-	;
+  : declarator {BUILD<NonTerminal>("init_declarator", $$, $1);}
+  | declarator '=' initializer {BUILD<NonTerminal>("init_declarator", $$, $1, $2, $3);}
+  ;
 
 storage_class_specifier
-	: TYPEDEF
-	| EXTERN
-	| STATIC
-	| AUTO
-	| REGISTER
-	;
+  : TYPEDEF {BUILD<NonTerminal>("storage_class_specifier", $$, $1);}
+  | EXTERN {BUILD<NonTerminal>("storage_class_specifier", $$, $1);}
+  | STATIC {BUILD<NonTerminal>("storage_class_specifier", $$, $1);}
+  | AUTO {BUILD<NonTerminal>("storage_class_specifier", $$, $1);}
+  | REGISTER {BUILD<NonTerminal>("storage_class_specifier", $$, $1);}
+  ;
 
 type_specifier
-	: TOKEN_VOID
-	| TOKEN_CHAR
-	| TOKEN_SHORT
-	| TOKEN_INT
-	| TOKEN_LONG
-	| TOKEN_FLOAT
-	| TOKEN_DOUBLE
-	| TOKEN_SIGNED
-	| TOKEN_UNSIGNED
-	| TOKEN_BOOL
-	| struct_or_union_specifier
-	| enum_specifier
-	| TYPE_NAME
-	;
+  : TOKEN_VOID {BUILD<NonTerminal>("type_specifier", $$, $1);}
+  | TOKEN_CHAR {BUILD<NonTerminal>("type_specifier", $$, $1);}
+  | TOKEN_SHORT {BUILD<NonTerminal>("type_specifier", $$, $1);}
+  | TOKEN_INT {BUILD<NonTerminal>("type_specifier", $$, $1);}
+  | TOKEN_LONG {BUILD<NonTerminal>("type_specifier", $$, $1);}
+  | TOKEN_FLOAT {BUILD<NonTerminal>("type_specifier", $$, $1);}
+  | TOKEN_DOUBLE {BUILD<NonTerminal>("type_specifier", $$, $1);}
+  | TOKEN_SIGNED {BUILD<NonTerminal>("type_specifier", $$, $1);}
+  | TOKEN_UNSIGNED {BUILD<NonTerminal>("type_specifier", $$, $1);}
+  | TOKEN_BOOL {BUILD<NonTerminal>("type_specifier", $$, $1);}
+  | struct_or_union_specifier {BUILD<NonTerminal>("type_specifier", $$, $1);}
+  | enum_specifier {BUILD<NonTerminal>("type_specifier", $$, $1);}
+  | TYPE_NAME {BUILD<NonTerminal>("type_specifier", $$, $1);}
+  ;
 
 struct_or_union_specifier
-	: struct_or_union IDENTIFIER '{' struct_declaration_list '}'
-	| struct_or_union '{' struct_declaration_list '}'
-	| struct_or_union IDENTIFIER
-	;
+  : struct_or_union IDENTIFIER '{' struct_declaration_list '}' {BUILD<NonTerminal>("struct_or_union_specifier", $$, $1, $2, $3, $4, $5);}
+  | struct_or_union '{' struct_declaration_list '}' {BUILD<NonTerminal>("struct_or_union_specifier", $$, $1, $2, $3, $4);}
+  | struct_or_union IDENTIFIER {BUILD<NonTerminal>("struct_or_union_specifier", $$, $1, $2);}
+  ;
 
 struct_or_union
-	: STRUCT
-	| UNION
-	;
+  : STRUCT {BUILD<NonTerminal>("struct_or_union", $$, $1);}
+  | UNION {BUILD<NonTerminal>("struct_or_union", $$, $1);}
+  ;
 
 struct_declaration_list
-	: struct_declaration
-	| struct_declaration_list struct_declaration
-	;
+  : struct_declaration {BUILD<NonTerminal>("struct_declaration_list", $$, $1);}
+  | struct_declaration_list struct_declaration {BUILD<NonTerminal>("struct_declaration_list", $$, $1, $2);}
+  ;
 
 struct_declaration
-	: specifier_qualifier_list struct_declarator_list ';'
-	;
+  : specifier_qualifier_list struct_declarator_list ';' {BUILD<NonTerminal>("struct_declaration", $$, $1, $2, $3);}
+  ;
 
 specifier_qualifier_list
-	: type_specifier specifier_qualifier_list
-	| type_specifier
-	| type_qualifier specifier_qualifier_list
-	| type_qualifier
-	;
+  : type_specifier specifier_qualifier_list {BUILD<NonTerminal>("specifier_qualifier_list", $$, $1, $2);}
+  | type_specifier {BUILD<NonTerminal>("specifier_qualifier_list", $$, $1);}
+  | type_qualifier specifier_qualifier_list {BUILD<NonTerminal>("specifier_qualifier_list", $$, $1, $2);}
+  | type_qualifier {BUILD<NonTerminal>("specifier_qualifier_list", $$, $1);}
+  ;
 
 struct_declarator_list
-	: struct_declarator
-	| struct_declarator_list ',' struct_declarator
-	;
+  : struct_declarator {BUILD<NonTerminal>("struct_declarator_list", $$, $1);}
+  | struct_declarator_list ',' struct_declarator {BUILD<NonTerminal>("struct_declarator_list", $$, $1, $2, $3);}
+  ;
 
 struct_declarator
-	: declarator
-	| ':' constant_expression
-	| declarator ':' constant_expression
-	;
+  : declarator {BUILD<NonTerminal>("struct_declarator", $$, $1);}
+  | ':' constant_expression {BUILD<NonTerminal>("struct_declarator", $$, $1, $2);}
+  | declarator ':' constant_expression {BUILD<NonTerminal>("struct_declarator", $$, $1, $2, $3);}
+  ;
 
 enum_specifier
-	: ENUM '{' enumerator_list '}'
-	| ENUM IDENTIFIER '{' enumerator_list '}'
-	| ENUM '{' enumerator_list ',' '}'
-	| ENUM IDENTIFIER '{' enumerator_list ',' '}'
-	| ENUM IDENTIFIER
-	;
+  : ENUM '{' enumerator_list '}' {BUILD<NonTerminal>("enum_specifier", $$, $1, $2, $3, $4);}
+  | ENUM IDENTIFIER '{' enumerator_list '}' {BUILD<NonTerminal>("enum_specifier", $$, $1, $2, $3, $4, $5);}
+  | ENUM '{' enumerator_list ',' '}' {BUILD<NonTerminal>("enum_specifier", $$, $1, $2, $3, $4, $5);}
+  | ENUM IDENTIFIER '{' enumerator_list ',' '}' {BUILD<NonTerminal>("enum_specifier", $$, $1, $2, $3, $4, $5, $6);}
+  | ENUM IDENTIFIER {BUILD<NonTerminal>("enum_specifier", $$, $1);}
+  ;
 
 enumerator_list
-	: enumerator
-	| enumerator_list ',' enumerator
-	;
+  : enumerator {BUILD<NonTerminal>("enumerator_list", $$, $1);}
+  | enumerator_list ',' enumerator {BUILD<NonTerminal>("enumerator_list", $$, $1, $2, $3);}
+  ;
 
 enumerator
-	: IDENTIFIER
-	| IDENTIFIER '=' constant_expression
-	;
+  : IDENTIFIER {BUILD<NonTerminal>("enumerator", $$, $1);}
+  | IDENTIFIER '=' constant_expression {BUILD<NonTerminal>("enumerator", $$, $1, $2, $3);}
+  ;
 
 type_qualifier
-	: TOKEN_CONST
-	| RESTRICT
-	| VOLATILE
-	;
+  : TOKEN_CONST {BUILD<NonTerminal>("type_qualifier", $$, $1);}
+  | RESTRICT {BUILD<NonTerminal>("type_qualifier", $$, $1);}
+  | VOLATILE {BUILD<NonTerminal>("type_qualifier", $$, $1);}
+  ;
 
 function_specifier
-	: INLINE
-	;
+  : INLINE {BUILD<NonTerminal>("function_specifier", $$, $1);}
+  ;
 
 declarator
-	: pointer direct_declarator
-	| direct_declarator
-	;
+  : pointer direct_declarator {BUILD<NonTerminal>("declarator", $$, $1, $2);}
+  | direct_declarator {BUILD<NonTerminal>("declarator", $$, $1);}
+  ;
 
 
 direct_declarator
-	: IDENTIFIER
-	| '(' declarator ')'
-	| direct_declarator '[' type_qualifier_list assignment_expression ']'
-	| direct_declarator '[' type_qualifier_list ']'
-	| direct_declarator '[' assignment_expression ']'
-	| direct_declarator '[' STATIC type_qualifier_list assignment_expression ']'
-	| direct_declarator '[' type_qualifier_list STATIC assignment_expression ']'
-	| direct_declarator '[' type_qualifier_list '*' ']'
-	| direct_declarator '[' '*' ']'
-	| direct_declarator '[' ']'
-	| direct_declarator '(' parameter_type_list ')'
-	| direct_declarator '(' identifier_list ')'
-	| direct_declarator '(' ')'
-	;
+  : IDENTIFIER {BUILD<NonTerminal>("direct_declarator", $$, $1);}
+  | '(' declarator ')' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3);}
+  | direct_declarator '[' type_qualifier_list assignment_expression ']' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3, $4, $5);}
+  | direct_declarator '[' type_qualifier_list ']' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3, $4);}
+  | direct_declarator '[' assignment_expression ']' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3, $4);}
+  | direct_declarator '[' STATIC type_qualifier_list assignment_expression ']' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3, $4, $5, $6);}
+  | direct_declarator '[' type_qualifier_list STATIC assignment_expression ']' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3, $4, $5, $6);}
+  | direct_declarator '[' type_qualifier_list '*' ']' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3, $4, $5);}
+  | direct_declarator '[' '*' ']' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3, $4);}
+  | direct_declarator '[' ']' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3);}
+  | direct_declarator '(' parameter_type_list ')' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3, $4);}
+  | direct_declarator '(' identifier_list ')' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3, $4);}
+  | direct_declarator '(' ')' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3);}
+  ;
 
 pointer
-	: '*'
-	| '*' type_qualifier_list
-	| '*' pointer
-	| '*' type_qualifier_list pointer
-	;
+  : '*' {BUILD<NonTerminal>("pointer", $$, $1);}
+  | '*' type_qualifier_list {BUILD<NonTerminal>("pointer", $$, $1, $2);}
+  | '*' pointer {BUILD<NonTerminal>("pointer", $$, $1, $2);}
+  | '*' type_qualifier_list pointer {BUILD<NonTerminal>("pointer", $$, $1, $2, $3);}
+  ;
 
 type_qualifier_list
-	: type_qualifier
-	| type_qualifier_list type_qualifier
-	;
+  : type_qualifier {BUILD<NonTerminal>("type_qualifier_list", $$, $1);}
+  | type_qualifier_list type_qualifier {BUILD<NonTerminal>("type_qualifier_list", $$, $1, $2);}
+  ;
 
 
 parameter_type_list
-	: parameter_list
-	| parameter_list ',' ELLIPSIS
-	;
+  : parameter_list {BUILD<NonTerminal>("parameter_type_list", $$, $1);}
+  | parameter_list ',' ELLIPSIS {BUILD<NonTerminal>("parameter_type_list", $$, $1, $2, $3);}
+  ;
 
 parameter_list
-	: parameter_declaration
-	| parameter_list ',' parameter_declaration
-	;
+  : parameter_declaration {BUILD<NonTerminal>("parameter_list", $$, $1);}
+  | parameter_list ',' parameter_declaration {BUILD<NonTerminal>("parameter_list", $$, $1, $2, $3);}
+  ;
 
 parameter_declaration
-	: declaration_specifiers declarator
-	| declaration_specifiers abstract_declarator
-	| declaration_specifiers
-	;
+  : declaration_specifiers declarator {BUILD<NonTerminal>("parameter_declaration", $$, $1, $2);}
+  | declaration_specifiers abstract_declarator {BUILD<NonTerminal>("parameter_declaration", $$, $1, $2);}
+  | declaration_specifiers {BUILD<NonTerminal>("parameter_declaration", $$, $1);}
+  ;
 
 identifier_list
-	: IDENTIFIER
-	| identifier_list ',' IDENTIFIER
-	;
+  : IDENTIFIER {BUILD<NonTerminal>("identifier_list", $$, $1);}
+  | identifier_list ',' IDENTIFIER {BUILD<NonTerminal>("identifier_list", $$, $1, $2, $3);}
+  ;
 
 type_name
-	: specifier_qualifier_list
-	| specifier_qualifier_list abstract_declarator
-	;
+  : specifier_qualifier_list {BUILD<NonTerminal>("type_name", $$, $1);}
+  | specifier_qualifier_list abstract_declarator {BUILD<NonTerminal>("type_name", $$, $1, $2);}
+  ;
 
 abstract_declarator
-	: pointer
-	| direct_abstract_declarator
-	| pointer direct_abstract_declarator
-	;
+  : pointer {BUILD<NonTerminal>("abstract_declarator", $$, $1);}
+  | direct_abstract_declarator {BUILD<NonTerminal>("abstract_declarator", $$, $1);}
+  | pointer direct_abstract_declarator {BUILD<NonTerminal>("abstract_declarator", $$, $1, $2);}
+  ;
 
 direct_abstract_declarator
-	: '(' abstract_declarator ')'
-	| '[' ']'
-	| '[' assignment_expression ']'
-	| direct_abstract_declarator '[' ']'
-	| direct_abstract_declarator '[' assignment_expression ']'
-	| '[' '*' ']'
-	| direct_abstract_declarator '[' '*' ']'
-	| '(' ')'
-	| '(' parameter_type_list ')'
-	| direct_abstract_declarator '(' ')'
-	| direct_abstract_declarator '(' parameter_type_list ')'
-	;
+  : '(' abstract_declarator ')' {BUILD<NonTerminal>("direct_abstract_declarator", $$, $1, $2, $3);}
+  | '[' ']' {BUILD<NonTerminal>("direct_abstract_declarator", $$, $1, $2);}
+  | '[' assignment_expression ']' {BUILD<NonTerminal>("direct_abstract_declarator", $$, $1, $2, $3);}
+  | direct_abstract_declarator '[' ']' {BUILD<NonTerminal>("direct_abstract_declarator", $$, $1, $2, $3);}
+  | direct_abstract_declarator '[' assignment_expression ']' {BUILD<NonTerminal>("direct_abstract_declarator", $$, $1, $2, $3, $4);}
+  | '[' '*' ']' {BUILD<NonTerminal>("direct_abstract_declarator", $$, $1, $2, $3);}
+  | direct_abstract_declarator '[' '*' ']' {BUILD<NonTerminal>("direct_abstract_declarator", $$, $1, $2, $3, $4);}
+  | '(' ')' {BUILD<NonTerminal>("direct_abstract_declarator", $$, $1, $2);}
+  | '(' parameter_type_list ')' {BUILD<NonTerminal>("direct_abstract_declarator", $$, $1, $2, $3);}
+  | direct_abstract_declarator '(' ')' {BUILD<NonTerminal>("direct_abstract_declarator", $$, $1, $2, $3);}
+  | direct_abstract_declarator '(' parameter_type_list ')' {BUILD<NonTerminal>("direct_abstract_declarator", $$, $1, $2, $3, $4);}
+  ;
 
 initializer
-	: assignment_expression
-	| '{' initializer_list '}'
-	| '{' initializer_list ',' '}'
-	;
+  : assignment_expression {BUILD<NonTerminal>("initializer", $$, $1);}
+  | '{' initializer_list '}' {BUILD<NonTerminal>("initializer", $$, $1, $2, $3);}
+  | '{' initializer_list ',' '}' {BUILD<NonTerminal>("initializer", $$, $1, $2, $3, $4);}
+  ;
 
 initializer_list
-	: initializer
-	| designation initializer
-	| initializer_list ',' initializer
-	| initializer_list ',' designation initializer
-	;
+  : initializer {BUILD<NonTerminal>("initializer_list", $$, $1);}
+  | designation initializer {BUILD<NonTerminal>("initializer_list", $$, $1, $2);}
+  | initializer_list ',' initializer {BUILD<NonTerminal>("initializer_list", $$, $1, $2, $3);}
+  | initializer_list ',' designation initializer {BUILD<NonTerminal>("initializer_list", $$, $1, $2, $3, $4);}
+  ;
 
 designation
-	: designator_list '='
-	;
+  : designator_list '=' {BUILD<NonTerminal>("designation", $$, $1, $2);}
+  ;
 
 designator_list
-	: designator
-	| designator_list designator
-	;
+  : designator {BUILD<NonTerminal>("designator_list", $$, $1);}
+  | designator_list designator {BUILD<NonTerminal>("designator_list", $$, $1, $2);}
+  ;
 
 designator
-	: '[' constant_expression ']'
-	| '.' IDENTIFIER
-	;
+  : '[' constant_expression ']' {BUILD<NonTerminal>("designator", $$, $1, $2, $3);}
+  | '.' IDENTIFIER {BUILD<NonTerminal>("designator", $$, $1, $2);}
+  ;
 
 statement
-	: labeled_statement
-	| compound_statement
-	| expression_statement
-	| selection_statement
-	| iteration_statement
-	| jump_statement
-	;
+  : labeled_statement {BUILD<NonTerminal>("statement", $$, $1);}
+  | compound_statement {BUILD<NonTerminal>("statement", $$, $1);}
+  | expression_statement {BUILD<NonTerminal>("statement", $$, $1);}
+  | selection_statement {BUILD<NonTerminal>("statement", $$, $1);}
+  | iteration_statement {BUILD<NonTerminal>("statement", $$, $1);}
+  | jump_statement {BUILD<NonTerminal>("statement", $$, $1);}
+  ;
 
 labeled_statement
-	: IDENTIFIER ':' statement
-	| CASE constant_expression ':' statement
-	| DEFAULT ':' statement
-	;
+  : IDENTIFIER ':' statement {BUILD<NonTerminal>("labeled_statement", $$, $1, $2, $3);}
+  | CASE constant_expression ':' statement {BUILD<NonTerminal>("labeled_statement", $$, $1, $2, $3, $4);}
+  | DEFAULT ':' statement {BUILD<NonTerminal>("labeled_statement", $$, $1, $2, $3);}
+  ;
 
 compound_statement
-	: '{' '}'
-	| '{' block_item_list '}'
-	;
+  : '{' '}' {BUILD<NonTerminal>("compound_statement", $$, $1, $2);}
+  | '{' block_item_list '}' {BUILD<NonTerminal>("compound_statement", $$, $1, $2, $3);}
+  ;
 
 block_item_list
-	: block_item
-	| block_item_list block_item
-	;
+  : block_item {BUILD<NonTerminal>("block_item_list", $$, $1);}
+  | block_item_list block_item {BUILD<NonTerminal>("block_item_list", $$, $1, $2);}
+  ;
 
 block_item
-	: declaration
-	| statement
-	;
+  : declaration {BUILD<NonTerminal>("block_item", $$, $1);}
+  | statement {BUILD<NonTerminal>("block_item", $$, $1);}
+  ;
 
 expression_statement
-	: ';'
-	| expression ';'
-	;
+  : ';' {BUILD<NonTerminal>("expression_statement", $$, $1);}
+  | expression ';' {BUILD<NonTerminal>("expression_statement", $$, $1, $2);}
+  ;
 
 selection_statement
-	: IF '(' expression ')' statement %prec LOWER_THAN_ELSE
-	| IF '(' expression ')' statement ELSE statement
-	| SWITCH '(' expression ')' statement
-	;
+  : IF '(' expression ')' statement %prec LOWER_THAN_ELSE
+  | IF '(' expression ')' statement ELSE statement {BUILD<NonTerminal>("selection_statement", $$, $1, $2, $3, $4, $5, $6, $7);}
+  | SWITCH '(' expression ')' statement {BUILD<NonTerminal>("selection_statement", $$, $1, $2, $3, $4, $5);}
+  ;
 
 iteration_statement
-	: WHILE '(' expression ')' statement
-	| DO statement WHILE '(' expression ')' ';'
-	| FOR '(' expression_statement expression_statement ')' statement
-	| FOR '(' expression_statement expression_statement expression ')' statement
-	| FOR '(' declaration expression_statement ')' statement
-	| FOR '(' declaration expression_statement expression ')' statement
-	;
+  : WHILE '(' expression ')' statement {BUILD<NonTerminal>("iteration_statement", $$, $1, $2, $3, $4, $5);}
+  | DO statement WHILE '(' expression ')' ';' {BUILD<NonTerminal>("iteration_statement", $$, $1, $2, $3, $4, $5, $6, $7);}
+  | FOR '(' expression_statement expression_statement ')' statement {BUILD<NonTerminal>("iteration_statement", $$, $1, $2, $3, $4, $5, $6);}
+  | FOR '(' expression_statement expression_statement expression ')' statement {BUILD<NonTerminal>("iteration_statement", $$, $1, $2, $3, $4, $5, $6, $7);}
+  | FOR '(' declaration expression_statement ')' statement {BUILD<NonTerminal>("iteration_statement", $$, $1, $2, $3, $4, $5, $6);}
+  | FOR '(' declaration expression_statement expression ')' statement {BUILD<NonTerminal>("iteration_statement", $$, $1, $2, $3, $4, $5, $6, $7);}
+  ;
 
 jump_statement
-	: GOTO IDENTIFIER ';'
-	| CONTINUE ';'
-	| BREAK ';'
-	| RETURN ';'
-	| RETURN expression ';'
-	;
+  : GOTO IDENTIFIER ';' {BUILD<NonTerminal>("jump_statement", $$, $1, $2);}
+  | CONTINUE ';' {BUILD<NonTerminal>("jump_statement", $$, $1, $2);}
+  | BREAK ';' {BUILD<NonTerminal>("jump_statement", $$, $1, $2);}
+  | RETURN ';' {BUILD<NonTerminal>("jump_statement", $$, $1, $2);}
+  | RETURN expression ';' {BUILD<NonTerminal>("jump_statement", $$, $1, $2);}
+  ;
 
 translation_unit
-	: external_declaration
-	| translation_unit external_declaration
-	;
+  : external_declaration {BUILD<NonTerminal>("translation_unit", $$, $1);}
+  | translation_unit external_declaration {BUILD<NonTerminal>("translation_unit", $$, $1, $2);}
+  ;
 
 external_declaration
-	: function_definition
-	| declaration
-	;
+  : function_definition {BUILD<NonTerminal>("external_declaration", $$, $1);}
+  | declaration {BUILD<NonTerminal>("external_declaration", $$, $1);}
+  ;
 
 function_definition
-	: declaration_specifiers declarator declaration_list compound_statement
-	| declaration_specifiers declarator compound_statement
-	;
+  : declaration_specifiers declarator declaration_list compound_statement {BUILD<NonTerminal>("function_definition", $$, $1, $2, $3, $4);}
+  | declaration_specifiers declarator compound_statement {BUILD<NonTerminal>("function_definition", $$, $1, $2, $3);}
+  ;
 
 declaration_list
-	: declaration
-	| declaration_list declaration
-	;
-
+  : declaration {BUILD<NonTerminal>("declaration_list", $$, $1);}
+  | declaration_list declaration {BUILD<NonTerminal>("declaration_list", $$, $1, $2);}
+  ;
 
 %%
 extern char yytext[];
@@ -528,6 +534,6 @@ extern int column;
 
 void yyerror(const char *s)
 {
-	fflush(stdout);
-	printf("\n%*s\n%*s\n", column, "^", column, s);
+  fflush(stdout);
+  printf("\n%*s\n%*s\n", column, "^", column, s);
 }
