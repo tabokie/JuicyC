@@ -19,21 +19,17 @@ int line = 0;
 int column = 0;
 uint16_t file = 0;
 
+
 // hook scanner input to
 // customized preprocessor.
 // At most one line once, good for resetting
 // file and line number. 
 #define YY_INPUT(buf, result, max_size)  \
   result = 0; \
-  while (1) { \
-    int c = FrontEnv::pp->get(); \
-    if (FrontEnv::pp->eof()) { \
-      break; \
-    } \
-    buf[result++] = c; \
-    if (result == max_size || c == '\n') { \
-      break; \
-    } \
+  while (result < max_size) { \
+    buf[result] = FrontEnv::pp->get(); \
+    if (!FrontEnv::pp->eof()) result ++; \
+    else break; \
   }
 
 #define MAKE_TOKEN(token) \

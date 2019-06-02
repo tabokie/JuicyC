@@ -13,7 +13,7 @@ namespace juicyc {
 class PreprocessorImpl: public Preprocessor {
 
  public:
-  PreprocessorImpl(CompilerOption& opt, Env* env)
+  PreprocessorImpl(CompilerOptions& opt, Env* env)
       : input_source_(opt.files),
         sys_(env->input_system()),
         buffer_(buffer_init_size_, '\0') {}
@@ -41,6 +41,7 @@ class PreprocessorImpl: public Preprocessor {
     }
     return source_fs_.get() != nullptr;
   }
+
   // fetch next source file
   bool next() {
     if (current_source_ < input_source_.size()) {
@@ -93,12 +94,6 @@ class PreprocessorImpl: public Preprocessor {
     input_source_.push_back(file);
   }
 
-  std::string context_desc() const {
-    return std::string("file ") + file_name() +
-           " line " + std::to_string(line_no()) +
-           " col " + std::to_string(col_no());
-  }
-
  protected:
   static constexpr int buffer_init_size_ = 16;
 
@@ -148,6 +143,11 @@ class PreprocessorImpl: public Preprocessor {
   bool bad(std::istream* is) {
     return is && is->bad() && !is->fail();
   }
+  std::string context_desc() const {
+    return std::string("file ") + file_name() +
+           " line " + std::to_string(line_no()) +
+           " col " + std::to_string(col_no());
+  }
 
   void ReadLine() {
     read_cursor_ = 0;
@@ -180,7 +180,8 @@ class PreprocessorImpl: public Preprocessor {
 
     // now read line from stream
     while (true) {
-      is->getline(buffer_.data() + write_cursor_, buffer_.size() - write_cursor_);
+      is->getline(buffer_.data() + write_cursor_,
+                  buffer_.size() - write_cursor_);
       if (is->fail() && !is->bad() && is->gcount() > 0) {
         is->clear();  // clear bits
         // have NOT encountered an '\n'
@@ -223,20 +224,28 @@ class PreprocessorImpl: public Preprocessor {
     }
     int read = read_cursor_;
     while (read < write_cursor_ && buffer_[read] == ' ') read ++;
-    if (buffer_[read] == '\n' || read >= write_cursor_) return; // nothing left
-    if (StringHelper::starts_with(buffer_.data() + read, "#define ", write_cursor_ - read)) {
+    if (buffer_[read] == '\n' || read >= write_cursor_) return;
+    if (StringUtil::starts_with(buffer_.data() + read,
+                                  "#define ",
+                                  write_cursor_ - read)) {
       read += 8;
-      std::string macro = StringHelper::identifier(buffer_.data() + read, write_cursor_ - read);
+      std::string macro = StringUtil::identifier(buffer_.data() + read,
+                                                   write_cursor_ - read);
       macro_table_.insert(macro);
-      // while (read_cursor_ < write_cursor_ && buffer_[read_cursor_] == ' ') read_cursor_ ++;
       // currently no value for macro
       read_cursor_ = write_cursor_;
-    } else if (StringHelper::starts_with(buffer_.data() + read, "#include ", write_cursor_ - read)) {
+    } else if (StringUtil::starts_with(buffer_.data() + read,
+                                         "#include ",
+                                         write_cursor_ - read)) {
       read += 9;
-      std::string header = StringHelper::identifier(buffer_.data() + read, write_cursor_ - read);
+      std::string header = StringUtil::identifier(buffer_.data() + read,
+                                                    write_cursor_ - read);
       if(header.size() > 0)
-      if (header.size() > 2 && header[0] != '\"' || header[header.size()-1] != '\"') {
-        status_ = Status::Corruption(context_desc() + ": " + header + " is not a valid header file.");
+      if (header.size() > 2 && header[0] != '\"' ||
+          header[header.size()-1] != '\"') {
+        status_ = Status::Corruption(context_desc() +
+                                      ": " + header +
+                                      " is not a valid header file.");
         return;
       }
       header = header.substr(1, header.size() - 2);
@@ -244,19 +253,27 @@ class PreprocessorImpl: public Preprocessor {
       header_stack_.back().is.swap(std::move(sys_->fopen(header)));
       header_stack_.back().name = header;
       read_cursor_ = write_cursor_;  // pass this line
-    } else if (StringHelper::starts_with(buffer_.data() + read, "#ifdef ", write_cursor_ - read)) {
+    } else if (StringUtil::starts_with(buffer_.data() + read,
+                                         "#ifdef ",
+                                         write_cursor_ - read)) {
       read += 7;
-      std::string macro = StringHelper::identifier(buffer_.data() + read, write_cursor_ - read);
+      std::string macro = StringUtil::identifier(buffer_.data() + read,
+                                                   write_cursor_ - read);
       if (macro_table_.count(macro) == 0)
         in_omit_mode_ = true;
       read_cursor_ = write_cursor_;
-    } else if (StringHelper::starts_with(buffer_.data() + read, "#ifndef ", write_cursor_ - read)) {
+    } else if (StringUtil::starts_with(buffer_.data() + read,
+                                       "#ifndef ",
+                                       write_cursor_ - read)) {
       read += 8;
-      std::string macro = StringHelper::identifier(buffer_.data() + read, write_cursor_ - read);
+      std::string macro = StringUtil::identifier(buffer_.data() + read,
+                                                 write_cursor_ - read);
       if (macro_table_.count(macro) > 0) 
         in_omit_mode_ = true;
       read_cursor_ = write_cursor_;
-    } else if (StringHelper::starts_with(buffer_.data() + read, "#endif", write_cursor_ - read)) {
+    } else if (StringUtil::starts_with(buffer_.data() + read,
+                                       "#endif",
+                                       write_cursor_ - read)) {
       in_omit_mode_ = false;
       read_cursor_ = write_cursor_;
     }

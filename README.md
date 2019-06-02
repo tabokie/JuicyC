@@ -12,3 +12,15 @@ C compiler for fun
 	-	make sure llvm header can be accessed through `INCLUDE env variable`, or append your local header path to `INCLUDE_FLAG` in Makefile
 -	google test: header needed
 	-	LLVM library should come with gtest, thus only gtest header is needed
+
+## Overview
+
+-	Preprocessor
+	-	macro and include command
+-	FrontEnd
+	-	build parse tree using Yacc
+-	Visitor
+	-	SyntaxVisitor: generate IR from parse tree
+	- JsonVisitor: generate JSON format abstract of parse tree
+-	BackEnd
+	-	convert IR to assembly using LLVM

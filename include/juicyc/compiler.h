@@ -2,6 +2,7 @@
 #define JUICYC_COMPILER_H_
 
 #include "status.h"
+#include "system.h"
 
 #include <string>
 #include <vector>
@@ -10,14 +11,21 @@
 
 namespace juicyc {
 
-struct CompilerOption {
+struct CompilerOptions {
   std::vector<std::string> files;
+  std::string dump_output;
   std::string output;
-  CompilerOption() = default;
-  CompilerOption(const CompilerOption& rhs) : 
-      files(rhs.files),
-      output(rhs.output) { }
-  ~CompilerOption() { }
+  // optional
+  InputSystem* isys = nullptr;
+  OutputSystem* osys = nullptr;
+  CompilerOptions() = default;
+  CompilerOptions(const CompilerOptions& rhs)
+      : files(rhs.files),
+        dump_output(rhs.dump_output),
+        output(rhs.output),
+        isys(rhs.isys),
+        osys(rhs.osys) {}
+  ~CompilerOptions() { }
 };
 
 class Compiler {
@@ -28,7 +36,7 @@ class Compiler {
   virtual Status Parse() = 0;
   virtual Status GenerateIR() = 0;
   virtual Status GenerateAsm() = 0;
-  static std::unique_ptr<Compiler> NewCompiler(CompilerOption& option);
+  static std::unique_ptr<Compiler> NewCompiler(CompilerOptions& option);
 };
 
 } // namespace juicyc

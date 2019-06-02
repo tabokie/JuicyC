@@ -10,7 +10,7 @@ TEST(PreprocessorTest, ReadLine) {
   auto sys = reinterpret_cast<test::MockInputSystem*>(env.input_system());
   std::string content = "first line\nsecond line\n";
   sys->set_file("main.cc", content);
-  auto p = Preprocessor::NewPreprocessor(CompilerOption(), &env);
+  auto p = Preprocessor::NewPreprocessor(CompilerOptions(), &env);
   p->push(std::string("main.cc"));
   EXPECT_TRUE(p->seek());
   char buf[50];
@@ -29,7 +29,7 @@ TEST(PreprocessorTest, ConditionalMacro) {
   auto sys = reinterpret_cast<test::MockInputSystem*>(env.input_system());
   std::string content = "#define A\n#ifdef A\nI should exist.\n#define B\n#endif\n#ifndef B\nI should not exist.\n#endif\n";
   sys->set_file("main.cc", content);
-  auto p = Preprocessor::NewPreprocessor(CompilerOption(), &env);
+  auto p = Preprocessor::NewPreprocessor(CompilerOptions(), &env);
   p->push(std::string("main.cc"));
   EXPECT_TRUE(p->seek());
   char buf[50];
@@ -50,7 +50,7 @@ TEST(PreprocessorTest, IncludeHeader) {
   sys->set_file("main.cc", content);
   content = "I have a ";
   sys->set_file("header.h", content);
-  auto p = Preprocessor::NewPreprocessor(CompilerOption(), &env);
+  auto p = Preprocessor::NewPreprocessor(CompilerOptions(), &env);
   p->push(std::string("main.cc"));
   EXPECT_TRUE(p->seek());
   char buf[50];
@@ -72,7 +72,7 @@ TEST(PreprocessorTest, ContextDescriptor) {
   sys->set_file("main.cc", content);
   content = "-#\n---*\n";
   sys->set_file("header.h", content);
-  auto p = Preprocessor::NewPreprocessor(CompilerOption(), &env);
+  auto p = Preprocessor::NewPreprocessor(CompilerOptions(), &env);
   p->push(std::string("main.cc"));
   EXPECT_TRUE(p->seek());
   while (!p->eof()) {

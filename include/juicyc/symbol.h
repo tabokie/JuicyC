@@ -20,13 +20,13 @@ struct Symbol {
   // helper function
   template <class ...Args>
   static void MakeSibling(Symbol* head, Symbol* tail, Args... siblings) {
-    head->left = tail;
-    tail->right = head;
+    head->right = tail;
+    tail->left = head;
     MakeSibling(tail, siblings...);
   }
   static void MakeSibling(Symbol* head, Symbol* tail) {
-    head->left = tail;
-    tail->right = head;
+    head->right = tail;
+    tail->left = head;
   }
 };
 
@@ -52,8 +52,11 @@ struct NonTerminal : public Symbol {
   }
   virtual void Invoke(SymbolVisitor& visitor) override {
     visitor.VisitNonTerminal(this);
-    if(childs)
-      childs->Invoke(visitor);
+    Symbol* cur = childs;
+    while (cur) {
+      cur->Invoke(visitor);
+      cur = cur->right;
+    }
     visitor.ExitNonTerminal(this);
   }
 };

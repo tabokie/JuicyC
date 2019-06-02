@@ -59,8 +59,12 @@ class MockOutputSystem : public OutputSystem {
 class MockIStreamPtr : public IStreamPtr {
 
  public:
-  MockIStreamPtr(IStreamPtr&& rhs, MockInputSystem* sys) : IStreamPtr(std::move(rhs)), sys_(sys) {}
-  MockIStreamPtr(std::istream* p, MockInputSystem* sys) : IStreamPtr(p), sys_(sys) {}
+  MockIStreamPtr(IStreamPtr&& rhs, MockInputSystem* sys)
+      : IStreamPtr(std::move(rhs)),
+        sys_(sys) {}
+  MockIStreamPtr(std::istream* p, MockInputSystem* sys)
+      : IStreamPtr(p),
+        sys_(sys) {}
   ~MockIStreamPtr() {}
 
  protected:

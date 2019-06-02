@@ -14,9 +14,8 @@ TEST_FLAG = /link /subsystem:console
 # llvm library should include gtest
 # TEST_LIB = gtest.lib gtest_main.lib
 LLVM_LIB = $(LLVM_PATH)/lib/*.lib
-SRC = frontend/*.cc util/*.cc pp/*.cc
+SRC = frontend/*.cc util/*.cc compiler/*.cc
 CMD = cmd/*.cc
-# backend/*.cc asm/*.cc
 
 # to fix `spawn failed error` for now
 LEX = start $(WIN_FLEX_BISON_PATH)/win_flex.exe

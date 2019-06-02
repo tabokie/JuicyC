@@ -6,23 +6,21 @@
 void yyerror(const char *s);
 int yylex();
 
-using juicyc::Symbol;
 using juicyc::NonTerminal;
-using juicyc::FrontEnv;
 
 template <typename SymType, typename YaccType, class ...YaccChild>
-void BUILD(std::string& name, YaccType& root, YaccType& first, YaccChild... childs) {
+void BUILD(const char* name, YaccType& root, YaccType& first, YaccChild... childs) {
   SymType *tmp = new SymType();
-  tmp->type = FrontEnv::Tag(name);
+  tmp->type = juicyc::FrontEnv::Tag(name);
   tmp->childs = first;
-  Symbol::MakeSibling(first, childs...);
+  juicyc::Symbol::MakeSibling(first, childs...);
   root = tmp;
 }
 
 template <typename SymType, typename YaccType>
-void BUILD(std::string& name, YaccType& root, YaccType& child) {
+void BUILD(const char* name, YaccType& root, YaccType& child) {
   SymType *tmp = new SymType();
-  tmp->type = FrontEnv::Tag(name);
+  tmp->type = juicyc::FrontEnv::Tag(name);
   tmp->childs = child;
   root = tmp;
 }
@@ -88,7 +86,7 @@ void BUILD(std::string& name, YaccType& root, YaccType& child) {
 %%
 
 primary_expression
-  : IDENTIFIER {   NonTerminal* tmp = new NonTerminal(); tmp->type = FrontEnv::Tag("primary_expression"); tmp->childs = $1; $$ = tmp;}
+  : IDENTIFIER {   NonTerminal* tmp = new NonTerminal(); tmp->type = juicyc::FrontEnv::Tag("primary_expression"); tmp->childs = $1; $$ = tmp;}
   | CONSTANT {BUILD<NonTerminal>("primary_expression", $$, $1);}
   | STRING_LITERAL {BUILD<NonTerminal>("primary_expression", $$, $1);}
   | '(' expression ')' {BUILD<NonTerminal>("primary_expression", $$, $1, $2, $3);}
@@ -509,8 +507,8 @@ jump_statement
   ;
 
 translation_unit
-  : external_declaration {BUILD<NonTerminal>("translation_unit", $$, $1);}
-  | translation_unit external_declaration {BUILD<NonTerminal>("translation_unit", $$, $1, $2);}
+  : external_declaration {BUILD<NonTerminal>("translation_unit", $$, $1); juicyc::FrontEnv::root = $$;}
+  | translation_unit external_declaration {BUILD<NonTerminal>("translation_unit", $$, $1, $2); juicyc::FrontEnv::root = $$;}
   ;
 
 external_declaration

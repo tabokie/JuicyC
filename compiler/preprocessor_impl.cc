@@ -4,7 +4,8 @@
 
 namespace juicyc {
 
-std::unique_ptr<Preprocessor> Preprocessor::NewPreprocessor(CompilerOption& opts, Env* env) {
+std::unique_ptr<Preprocessor> Preprocessor::NewPreprocessor(
+	    CompilerOptions& opts, Env* env) {
   return std::make_unique<PreprocessorImpl>(opts, env);
 }
 
