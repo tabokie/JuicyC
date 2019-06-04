@@ -9,7 +9,7 @@ C compiler for fun
 -	LLVM: library + header needed
 	-	compile LLVM src and place Release-Dynamic (/MD) library to `$(JUICYC_DIR)/bin/llvm/lib` folder
 	-	override `LLVM_PATH` in Makefile if needed
-	-	make sure llvm header can be accessed through `INCLUDE env variable`, or append your local header path to `INCLUDE_FLAG` in Makefile
+	-	make sure llvm header can be accessed through `INCLUDE` env variable, or append your local header path to `INCLUDE_FLAG` in Makefile
 -	google test: header needed
 	-	LLVM library should come with gtest, thus only gtest header is needed
 

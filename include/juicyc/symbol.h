@@ -61,6 +61,28 @@ struct NonTerminal : public Symbol {
   }
 };
 
+struct Expression : public NonTerminal {
+  Expression() : NonTerminal() {}
+  ~Expression() {}
+  virtual void Invoke(SymbolVisitor& visitor) override {
+    bool use_base_impl = false;
+    if (!visitor.VisitExpression(this)) {
+      use_base_impl = true;
+      visitor.VisitNonTerminal(this);
+    }
+    Symbol* cur = childs;
+    while (cur) {
+      cur->Invoke(visitor);
+      cur = cur->right;
+    }
+    if (use_base_impl) {
+      visitor.ExitNonTerminal(this);
+    } else {
+      visitor.ExitExpression(this);
+    }
+  }
+};
+
 // TODO: add more internal node type 
 // inheriting from NonTerminal.
 // Add type identifier.

@@ -36,7 +36,7 @@ class Compiler {
   virtual Status Parse() = 0;
   virtual Status GenerateIR() = 0;
   virtual Status GenerateAsm() = 0;
-  static std::unique_ptr<Compiler> NewCompiler(CompilerOptions& option);
+  static std::unique_ptr<Compiler> NewCompiler(CompilerOptions option);
 };
 
 } // namespace juicyc

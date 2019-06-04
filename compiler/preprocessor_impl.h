@@ -13,7 +13,7 @@ namespace juicyc {
 class PreprocessorImpl: public Preprocessor {
 
  public:
-  PreprocessorImpl(CompilerOptions& opt, Env* env)
+  PreprocessorImpl(CompilerOptions opt, Env* env)
       : input_source_(opt.files),
         sys_(env->input_system()),
         buffer_(buffer_init_size_, '\0') {}
@@ -37,7 +37,7 @@ class PreprocessorImpl: public Preprocessor {
   bool seek() {
     if (current_source_ < input_source_.size()) {
       clear();
-      source_fs_.swap(sys_->fopen(input_source_[current_source_]));
+      source_fs_ = sys_->fopen(input_source_[current_source_]);
     }
     return source_fs_.get() != nullptr;
   }
@@ -47,7 +47,7 @@ class PreprocessorImpl: public Preprocessor {
     if (current_source_ < input_source_.size()) {
       clear();
       current_source_ ++;
-      source_fs_.swap(sys_->fopen(input_source_[current_source_]));
+      source_fs_ = sys_->fopen(input_source_[current_source_]);
     }
     return current_source_ < input_source_.size();
   }
@@ -90,7 +90,7 @@ class PreprocessorImpl: public Preprocessor {
     return read_cursor_;
   }
 
-  void push(std::string& file) {
+  void push(std::string file) {
     input_source_.push_back(file);
   }
 
@@ -250,7 +250,7 @@ class PreprocessorImpl: public Preprocessor {
       }
       header = header.substr(1, header.size() - 2);
       header_stack_.emplace_back(HeaderStack());
-      header_stack_.back().is.swap(std::move(sys_->fopen(header)));
+      header_stack_.back().is = std::move(sys_->fopen(header));
       header_stack_.back().name = header;
       read_cursor_ = write_cursor_;  // pass this line
     } else if (StringUtil::starts_with(buffer_.data() + read,

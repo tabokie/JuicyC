@@ -10,7 +10,7 @@ namespace juicyc {
 
 class CompilerImpl : public Compiler {
  public:
-  CompilerImpl(CompilerOptions& opts) : opts_(opts) { Init(); }
+  CompilerImpl(CompilerOptions opts) : opts_(opts) { Init(); }
   ~CompilerImpl() { }
   // preprocessor + scanner + parser
   Status Parse() override {
@@ -39,7 +39,7 @@ class CompilerImpl : public Compiler {
  		if (!opts_.osys) opts_.osys = new OutputSystem();
  		env_.set_input_system(opts_.isys);
  		env_.set_output_system(opts_.osys);
- 		FrontEnv::pp.swap(Preprocessor::NewPreprocessor(opts_, &env_));
+ 		FrontEnv::pp = Preprocessor::NewPreprocessor(opts_, &env_);
  	}
 };
 

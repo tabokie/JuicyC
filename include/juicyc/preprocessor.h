@@ -25,8 +25,8 @@ class Preprocessor : public NoMove {
   // task scheduler
   virtual bool seek() = 0;
   virtual bool next() = 0;
-  virtual void push(std::string& file) = 0;
-  static std::unique_ptr<Preprocessor> NewPreprocessor(CompilerOptions&, Env*);
+  virtual void push(std::string file) = 0;
+  static std::unique_ptr<Preprocessor> NewPreprocessor(CompilerOptions, Env*);
 };
 
 } // namespace juicyc

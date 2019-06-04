@@ -14,7 +14,7 @@ class UniqueSymtable {
   std::vector<std::string> vec_;
   std::unordered_map<std::string, uint16_t> map_;
  public:
-  uint16_t Insert(std::string& key) {
+  uint16_t Insert(const std::string& key) {
     uint16_t ret = Get(key);
     if(ret > 0) return ret;
     vec_.push_back(key);
@@ -29,7 +29,7 @@ class UniqueSymtable {
   const std::string& Get(uint16_t id) const {
     return vec_[id-1];
   }
-  uint16_t Get(std::string& key) {
+  uint16_t Get(const std::string& key) {
     auto p = map_.find(key);
     if(p == map_.end()) return 0;
     return p->second;
