@@ -8,24 +8,16 @@ t = Tree()
 
 def traverse_dict(d, node):
     for key, value in d.items():
-        A = node.add_child(name=key)
         if(isinstance(value, dict)):
+            A = node.add_child(name=key)
             traverse_dict(value, A)
         else:
-            A = node.get_leaves_by_name(key)
-            A[0].name += ": " + value
+            if(node.name.find("terminal") != -1):
+                node.name = key + ": " + value
+            else:
+                node.name += "\n" + key + ": " + value
 
 traverse_dict(load_dict, t)
-
-print ("Original tree:")
-print (t.get_ascii(show_internal=True))
-ts = TreeStyle()
-ts.show_leaf_name = False
-def my_layout(node):
-    F = TextFace(node.name, fsize=12, ftype="italic", bold=True)
-    add_face_to_node(F, node, column=0, position="branch-top")
-ts.scale = 20
-ts.layout_fn = my_layout
 
 def get_nodes(node):
     l = 0
@@ -33,24 +25,54 @@ def get_nodes(node):
         l += 1
     return l
 
+print ("Original tree:")
+print (t.get_ascii(show_internal=True))
+ts = TreeStyle()
+ts.show_leaf_name = False
+def my_layout(node):
+    fstle = "normal"
+    pos = "branch-top"
+    bd = False
+    fgc = "#4169e1"
+    if(get_nodes(node) == 1):
+        fstle = "italic"
+        pos = "branch-right"
+        bd = True
+        fgc = "#000000"
+    if(node.name.find("\n") != -1):
+        a = node.name[0: node.name.find("\n")]
+        b = node.name[node.name.find("\n") + 1: len(node.name)]    
+        F = TextFace(a, fgcolor=fgc, fsize=12, fstyle=fstle, bold=bd)
+        G = TextFace(b, fgcolor=fgc, fsize=12, fstyle=fstle, bold=False)
+        add_face_to_node(F, node, column=0, position=pos)
+        add_face_to_node(G, node, column=0, position=pos)
+    else:
+        F = TextFace(node.name, fgcolor=fgc, fsize=12, fstyle=fstle, bold=bd)
+        add_face_to_node(F, node, column=0, position=pos)
+
+ts.scale = 20
+ts.layout_fn = my_layout
+max = get_nodes(t)
 for n in t.traverse():
     l = get_nodes(n)
-    width = int((math.log(l, 10))*4)
+    width = l / (max - 1) * 5
     style = NodeStyle()
-    style["shape"] = "sphere"
-    style["size"] = 8
+    style["shape"] = "circle"
+    style["size"] = 7
+    style["fgcolor"] = "#000000"
     style["vt_line_color"] = "#000000"
     style["hz_line_color"] = "#000000"
     style["vt_line_type"] = 0
     style["hz_line_type"] = 0
     style["hz_line_width"] = width
     style["vt_line_width"] = width
-    if(len(n) == 1):
-        style["fgcolor"] = "#00ff00"
+    dist = n.name.find("\n")
+    if(dist == -1):
+        dist = len(n.name)
+    n.dist = dist*0.6
+    if(l == 1):
+        n.dist = 3
     n.set_style(style)
-    # print(n)
-    n.dist = len(n.name)*0.7
 
 t.show(tree_style=ts)
 t.render("mytree.png", tree_style=ts)
-# t.show()
