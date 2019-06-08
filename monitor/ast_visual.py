@@ -1,7 +1,13 @@
 from ete3 import *
 import json
 import math
-with open("./main.json","r") as f:
+import sys
+
+if(len(sys.argv) >= 3):
+    print("Too many arguments.\nUsage: python ast_visual.py *.json")
+    sys.exit(-1)
+file_path = sys.argv[1]
+with open(file_path, "r") as f:
     load_dict = json.load(f)
 
 t = Tree()
