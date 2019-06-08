@@ -61,27 +61,34 @@ struct NonTerminal : public Symbol {
   }
 };
 
-struct Expression : public NonTerminal {
-  Expression() : NonTerminal() {}
-  ~Expression() {}
-  virtual void Invoke(SymbolVisitor& visitor) override {
-    bool use_base_impl = false;
-    if (!visitor.VisitExpression(this)) {
-      use_base_impl = true;
-      visitor.VisitNonTerminal(this);
-    }
-    Symbol* cur = childs;
-    while (cur) {
-      cur->Invoke(visitor);
-      cur = cur->right;
-    }
-    if (use_base_impl) {
-      visitor.ExitNonTerminal(this);
-    } else {
-      visitor.ExitExpression(this);
-    }
-  }
-};
+#define DERIVE_SYMBOL(TYPE) \
+struct TYPE : public NonTerminal { \
+  TYPE() : NonTerminal() {} \
+  ~TYPE() {} \
+  virtual void Invoke(SymbolVisitor& visitor) override { \
+    bool use_base_impl = false; \
+    if (!visitor.Visit##TYPE(this)) { \
+      use_base_impl = true; \
+      visitor.VisitNonTerminal(this); \
+    } \
+    Symbol* cur = childs; \
+    while (cur) { \
+      cur->Invoke(visitor); \
+      cur = cur->right; \
+    } \
+    if (use_base_impl) { \
+      visitor.ExitNonTerminal(this); \
+    } else { \
+      visitor.Exit##TYPE(this); \
+    } \
+  } \
+}
+
+DERIVE_SYMBOL(UnaryExpression);
+DERIVE_SYMBOL(BinaryExpression);
+DERIVE_SYMBOL(TernaryExpression);
+
+#undef DERIVE_SYMBOL
 
 // TODO: add more internal node type 
 // inheriting from NonTerminal.

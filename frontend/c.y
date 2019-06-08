@@ -6,7 +6,11 @@
 void yyerror(const char *s);
 int yylex();
 
+using juicyc::Terminal;
 using juicyc::NonTerminal;
+using juicyc::UnaryExpression;
+using juicyc::BinaryExpression;
+using juicyc::TernaryExpression;
 
 template <typename SymType, typename YaccType, class ...YaccChild>
 void BUILD(const char* name, YaccType& root, YaccType& first, YaccChild... childs) {
@@ -111,12 +115,12 @@ argument_expression_list
   ;
 
 unary_expression
-  : postfix_expression {BUILD<NonTerminal>("unary_expression", $$, $1);}
-  | INC_OP unary_expression {BUILD<NonTerminal>("unary_expression", $$, $1, $2);}
-  | DEC_OP unary_expression {BUILD<NonTerminal>("unary_expression", $$, $1, $2);}
-  | unary_operator cast_expression {BUILD<NonTerminal>("unary_expression", $$, $1, $2);}
-  | SIZEOF unary_expression {BUILD<NonTerminal>("unary_expression", $$, $1, $2);}
-  | SIZEOF '(' type_name ')' {BUILD<NonTerminal>("unary_expression", $$, $1, $2, $3, $4);}
+  : postfix_expression {BUILD<UnaryExpression>("unary_expression", $$, $1);}
+  | INC_OP unary_expression {BUILD<UnaryExpression>("unary_expression", $$, $1, $2);}
+  | DEC_OP unary_expression {BUILD<UnaryExpression>("unary_expression", $$, $1, $2);}
+  | unary_operator cast_expression {BUILD<UnaryExpression>("unary_expression", $$, $1, $2);}
+  | SIZEOF unary_expression {BUILD<UnaryExpression>("unary_expression", $$, $1, $2);}
+  | SIZEOF '(' type_name ')' {BUILD<UnaryExpression>("unary_expression", $$, $1, $2, $3, $4);}
   ;
 
 unary_operator
@@ -134,66 +138,66 @@ cast_expression
   ;
 
 multiplicative_expression
-  : cast_expression {BUILD<NonTerminal>("multiplicative_expression", $$, $1);}
-  | multiplicative_expression '*' cast_expression {BUILD<NonTerminal>("multiplicative_expression", $$, $1, $2, $3);}
-  | multiplicative_expression '/' cast_expression {BUILD<NonTerminal>("multiplicative_expression", $$, $1, $2, $3);}
-  | multiplicative_expression '%' cast_expression {BUILD<NonTerminal>("multiplicative_expression", $$, $1, $2, $3);}
+  : cast_expression {BUILD<BinaryExpression>("multiplicative_expression", $$, $1);}
+  | multiplicative_expression '*' cast_expression {BUILD<BinaryExpression>("multiplicative_expression", $$, $1, $2, $3);}
+  | multiplicative_expression '/' cast_expression {BUILD<BinaryExpression>("multiplicative_expression", $$, $1, $2, $3);}
+  | multiplicative_expression '%' cast_expression {BUILD<BinaryExpression>("multiplicative_expression", $$, $1, $2, $3);}
   ;
 
 additive_expression
-  : multiplicative_expression {BUILD<NonTerminal>("additive_expression", $$, $1);}
-  | additive_expression '+' multiplicative_expression {BUILD<NonTerminal>("additive_expression", $$, $1, $2, $3);}
-  | additive_expression '-' multiplicative_expression {BUILD<NonTerminal>("additive_expression", $$, $1, $2, $3);}
+  : multiplicative_expression {BUILD<BinaryExpression>("additive_expression", $$, $1);}
+  | additive_expression '+' multiplicative_expression {BUILD<BinaryExpression>("additive_expression", $$, $1, $2, $3);}
+  | additive_expression '-' multiplicative_expression {BUILD<BinaryExpression>("additive_expression", $$, $1, $2, $3);}
   ;
 
 shift_expression
-  : additive_expression {BUILD<NonTerminal>("shift_expression", $$, $1);}
-  | shift_expression LEFT_OP additive_expression {BUILD<NonTerminal>("shift_expression", $$, $1, $2, $3);}
-  | shift_expression RIGHT_OP additive_expression {BUILD<NonTerminal>("shift_expression", $$, $1, $2, $3);}
+  : additive_expression {BUILD<BinaryExpression>("shift_expression", $$, $1);}
+  | shift_expression LEFT_OP additive_expression {BUILD<BinaryExpression>("shift_expression", $$, $1, $2, $3);}
+  | shift_expression RIGHT_OP additive_expression {BUILD<BinaryExpression>("shift_expression", $$, $1, $2, $3);}
   ;
 
 relational_expression
-  : shift_expression {BUILD<NonTerminal>("relational_expression", $$, $1);}
-  | relational_expression '<' shift_expression {BUILD<NonTerminal>("relational_expression", $$, $1, $2, $3);}
-  | relational_expression '>' shift_expression {BUILD<NonTerminal>("relational_expression", $$, $1, $2, $3);}
-  | relational_expression LE_OP shift_expression {BUILD<NonTerminal>("relational_expression", $$, $1, $2, $3);}
-  | relational_expression GE_OP shift_expression {BUILD<NonTerminal>("relational_expression", $$, $1, $2, $3);}
+  : shift_expression {BUILD<BinaryExpression>("relational_expression", $$, $1);}
+  | relational_expression '<' shift_expression {BUILD<BinaryExpression>("relational_expression", $$, $1, $2, $3);}
+  | relational_expression '>' shift_expression {BUILD<BinaryExpression>("relational_expression", $$, $1, $2, $3);}
+  | relational_expression LE_OP shift_expression {BUILD<BinaryExpression>("relational_expression", $$, $1, $2, $3);}
+  | relational_expression GE_OP shift_expression {BUILD<BinaryExpression>("relational_expression", $$, $1, $2, $3);}
   ;
 
 equality_expression
-  : relational_expression {BUILD<NonTerminal>("equality_expression", $$, $1);}
-  | equality_expression EQ_OP relational_expression {BUILD<NonTerminal>("equality_expression", $$, $1, $2, $3);}
-  | equality_expression NE_OP relational_expression {BUILD<NonTerminal>("equality_expression", $$, $1, $2, $3);}
+  : relational_expression {BUILD<BinaryExpression>("equality_expression", $$, $1);}
+  | equality_expression EQ_OP relational_expression {BUILD<BinaryExpression>("equality_expression", $$, $1, $2, $3);}
+  | equality_expression NE_OP relational_expression {BUILD<BinaryExpression>("equality_expression", $$, $1, $2, $3);}
   ;
 
 and_expression
-  : equality_expression {BUILD<NonTerminal>("and_expression", $$, $1);}
-  | and_expression '&' equality_expression {BUILD<NonTerminal>("and_expression", $$, $1, $2, $3);}
+  : equality_expression {BUILD<BinaryExpression>("and_expression", $$, $1);}
+  | and_expression '&' equality_expression {BUILD<BinaryExpression>("and_expression", $$, $1, $2, $3);}
   ;
 
 exclusive_or_expression
-  : and_expression {BUILD<NonTerminal>("exclusive_or_expression", $$, $1);}
-  | exclusive_or_expression '^' and_expression {BUILD<NonTerminal>("exclusive_or_expression", $$, $1, $2, $3);}
+  : and_expression {BUILD<BinaryExpression>("exclusive_or_expression", $$, $1);}
+  | exclusive_or_expression '^' and_expression {BUILD<BinaryExpression>("exclusive_or_expression", $$, $1, $2, $3);}
   ;
 
 inclusive_or_expression
-  : exclusive_or_expression {BUILD<NonTerminal>("inclusive_or_expression", $$, $1);}
-  | inclusive_or_expression '|' exclusive_or_expression {BUILD<NonTerminal>("inclusive_or_expression", $$, $1, $2, $3);}
+  : exclusive_or_expression {BUILD<BinaryExpression>("inclusive_or_expression", $$, $1);}
+  | inclusive_or_expression '|' exclusive_or_expression {BUILD<BinaryExpression>("inclusive_or_expression", $$, $1, $2, $3);}
   ;
 
 logical_and_expression
-  : inclusive_or_expression {BUILD<NonTerminal>("logical_and_expression", $$, $1);}
-  | logical_and_expression AND_OP inclusive_or_expression {BUILD<NonTerminal>("logical_and_expression", $$, $1, $2, $3);}
+  : inclusive_or_expression {BUILD<BinaryExpression>("logical_and_expression", $$, $1);}
+  | logical_and_expression AND_OP inclusive_or_expression {BUILD<BinaryExpression>("logical_and_expression", $$, $1, $2, $3);}
   ;
 
 logical_or_expression
-  : logical_and_expression {BUILD<NonTerminal>("logical_or_expression", $$, $1);}
-  | logical_or_expression OR_OP logical_and_expression {BUILD<NonTerminal>("logical_or_expression", $$, $1, $2, $3);}
+  : logical_and_expression {BUILD<BinaryExpression>("logical_or_expression", $$, $1);}
+  | logical_or_expression OR_OP logical_and_expression {BUILD<BinaryExpression>("logical_or_expression", $$, $1, $2, $3);}
   ;
 
 conditional_expression
-  : logical_or_expression {BUILD<NonTerminal>("conditional_expression", $$, $1);}
-  | logical_or_expression '?' expression ':' conditional_expression {BUILD<NonTerminal>("conditional_expression", $$, $1, $2, $3, $4, $5);}
+  : logical_or_expression {BUILD<TernaryExpression>("conditional_expression", $$, $1);}
+  | logical_or_expression '?' expression ':' conditional_expression {BUILD<TernaryExpression>("conditional_expression", $$, $1, $2, $3, $4, $5);}
   ;
 
 assignment_expression

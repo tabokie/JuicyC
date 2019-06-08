@@ -5,6 +5,7 @@
 #include "juicyc/preprocessor.h"
 #include "frontend/front_env.h"
 #include "visitor/json_dumper.h"
+#include "visitor/llvm_ir_visitor.h"
 
 namespace juicyc {
 
@@ -19,9 +20,14 @@ class CompilerImpl : public Compiler {
   	if (s.ok() &&
   		  FrontEnv::root &&
   		  opts_.dump_output.size() > 0) {
-  		JsonDumper dumper(opts_.dump_output, &env_);
-  		FrontEnv::root->Invoke(dumper);
-  		return dumper.status();
+      LLVMIRVisitor visitor;
+      FrontEnv::root->Invoke(visitor);
+      s = visitor.status();
+      if (s.ok() && opts_.dump_output.size() > 0) {
+        JsonDumper dumper(opts_.dump_output, &env_);
+        FrontEnv::root->Invoke(dumper);
+        s = dumper.status();
+      }
   	}
   	return s;
   }

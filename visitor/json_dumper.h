@@ -15,7 +15,7 @@ class JsonDumper : public SymbolVisitor {
       : output_(output),
         env_(env) { Init(); }
   ~JsonDumper() { env_->output_system()->fclose(os_); }
-  bool VisitTerminal(Terminal* n) override {
+  void VisitTerminal(Terminal* n) override {
     if (!block_head_) {
       (*os_) << ",\n";
     } else block_head_ = false;
@@ -23,10 +23,9 @@ class JsonDumper : public SymbolVisitor {
            << "\"value\": "
            // << static_cast<int>(n->type)
            << "\"" << (n->value) << "\"";
-    return true;
   }
-  bool ExitTerminal(Terminal* n) override { return true; }
-  bool VisitNonTerminal(NonTerminal* n) override {
+  void ExitTerminal(Terminal* n) override {}
+  void VisitNonTerminal(NonTerminal* n) override {
     if (!block_head_) {
       (*os_) << ",\n";
     } else block_head_ = false;
@@ -35,13 +34,11 @@ class JsonDumper : public SymbolVisitor {
            << FrontEnv::Untag(n->type) << "\": {\n";
     indent_ += 2;
     block_head_ = true;
-    return true;
   }
-  bool ExitNonTerminal(NonTerminal* n) override {
+  void ExitNonTerminal(NonTerminal* n) override {
     indent_ -= 2;
     block_head_ = false;
     (*os_) << "\n" << std::string(indent_, ' ') <<  "}";
-    return true;
   }
   Status status() const override {
     return status_;

@@ -42,6 +42,11 @@ struct FunctionGuard {
         name_(name) {
     os_ << "entering " << name_ << std::endl;
   }
+  FunctionGuard(std::ostream& os, const std::string name)
+      : os_(os),
+        name_(name) {
+    os_ << "entering " << name_ << std::endl;
+  }
   ~FunctionGuard() {
     os_ << "exiting " << name_ << std::endl;
   }

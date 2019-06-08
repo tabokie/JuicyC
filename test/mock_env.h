@@ -18,7 +18,7 @@ class MockInputSystem : public InputSystem {
 
  public:
   void set_file(const std::string& file, const std::string& content) {
-    filesys_.insert(std::make_pair(file, content));
+    filesys_[file] = content;
   }
   virtual IStreamPtr fopen(const std::string& file) {
     auto p = filesys_.find(file);
@@ -49,7 +49,7 @@ class MockOutputSystem : public OutputSystem {
     std::string str = reinterpret_cast<std::ostringstream*>(p.get())->str();
     size_t idx = str.find(':');
     if(idx == std::string::npos) return ; // invalid
-    filesys_.insert(std::make_pair(str.substr(0, idx), str.substr(idx + 1)));
+    filesys_[str.substr(0, idx)] = str.substr(idx + 1);
   }
 
  protected:
