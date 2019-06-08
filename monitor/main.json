@@ -1,0 +1,48 @@
+{
+  "tree_root": {
+    "external_declaration": {
+      "declaration": {
+        "declaration_specifiers": {
+          "type_specifier": {
+              "terminal-0": {
+                "value": "int", 
+                "file": "xxx", 
+                "line": "xxx",
+                "column": "xxx"
+              }
+          }
+        },
+        "init_declarator_list": {
+          "init_declarator": {
+            "declarator": {
+              "direct_declarator": {
+                "terminal-1": {
+                  "value": "a", 
+                  "file": "xxx", 
+                  "line": "xxx",
+                  "column": "xxx"
+                }
+              }
+            },
+            "terminal-2": {
+                "value": "=", 
+                "file": "xxx", 
+                "line": "xxx",
+                "column": "xxx"
+            },
+            "initializer": {
+              "primary_expression": {
+                "terminal-3": {
+                  "value": "0", 
+                  "file": "xxx", 
+                  "line": "xxx",
+                  "column": "xxx"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
