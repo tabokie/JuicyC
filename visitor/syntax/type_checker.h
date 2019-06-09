@@ -1,8 +1,9 @@
-#ifndef JUICYC_VISITOR_IR_TYPE_CHECKER_H_
-#define JUICYC_VISITOR_IR_TYPE_CHECKER_H_
+#ifndef JUICYC_VISITOR_SYNTAX_TYPE_CHECKER_H_
+#define JUICYC_VISITOR_SYNTAX_TYPE_CHECKER_H_
 
 #include "context.h"
 #include "type.h"
+#include "util/util.h"
 
 #include <llvm/IR/Type.h>
 #include <llvm/IR/Value.h>
@@ -14,11 +15,10 @@
 #include <map>
 #include <functional>
 #include <string>
-
-using namespace llvm;
+#include <iostream>
 
 namespace juicyc {
-namespace llvm_ir {
+namespace syntax {
 
 class TypeChecker {
  public:
@@ -32,8 +32,8 @@ class TypeChecker {
     return std::make_shared<InternalType>(p->second(context_->llvm));
   }
   // type cast is only applied on raw value and type
-  Value* CastTo(Value* value, Type* to, BasicBlock* block, bool _explicit = true) {
-    Type* from = value->getType();
+  llvm::Value* CastTo(llvm::Value* value, llvm::Type* to, bool _explicit = true) {
+    llvm::Type* from = value->getType();
     if (from == to) return value;
     if (_explicit) {
       // cross cast
@@ -67,24 +67,26 @@ class TypeChecker {
         return context_->builder.CreateFPTrunc(value, to);
     }
   }
-  Value* CastToBoolean(Value* value) {
-    Type* type = value->getType();
+  llvm::Value* CastToBoolean(llvm::Value* value) {
+    llvm::Type* type = value->getType();
     llvm::Type::TypeID id = type->getTypeID();
     if (id == llvm::Type::IntegerTyID) {
-      Value* condValue = context_->builder.CreateIntCast(value, Type::getInt1Ty(context_->llvm), true);
-      return context_->builder.CreateICmpNE(condValue, ConstantInt::get(Type::getInt1Ty(context_->llvm), 0, true));
+      llvm::Value* condValue = context_->builder.CreateIntCast(value, llvm::Type::getInt1Ty(context_->llvm), true);
+      return context_->builder.CreateICmpNE(condValue,
+          llvm::ConstantInt::get(llvm::Type::getInt1Ty(context_->llvm), 0, true));
     } else if (id == llvm::Type::FloatTyID || id == llvm::Type::DoubleTyID) {
-      return context_->builder.CreateFCmpONE(value, ConstantFP::get(context_->llvm, APFloat(0.0)));
+      return context_->builder.CreateFCmpONE(value,
+          llvm::ConstantFP::get(context_->llvm, llvm::APFloat(0.0)));
     }
     return nullptr;
   }
  private:
   Context* context_ = nullptr;
-  static std::unordered_map<std::string, std::function<Type*(LLVMContext&)>>
+  static std::unordered_map<std::string, std::function<llvm::Type*(llvm::LLVMContext&)>>
       llvm_type_string_map_;
 };
 
-}  // namespace llvm_ir
+}  // namespace syntax
 }  // namespace juicyc
 
-#endif  // JUICYC_VISITOR_IR_TYPE_CHECKER_H_
+#endif  // JUICYC_VISITOR_SYNTAX_TYPE_CHECKER_H_

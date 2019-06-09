@@ -61,7 +61,7 @@ struct NonTerminal : public Symbol {
   }
 };
 
-#define DERIVE_SYMBOL(TYPE) \
+#define DUPLICATE_SYMBOL(TYPE) \
 struct TYPE : public NonTerminal { \
   TYPE() : NonTerminal() {} \
   ~TYPE() {} \
@@ -84,10 +84,44 @@ struct TYPE : public NonTerminal { \
   } \
 }
 
-DERIVE_SYMBOL(UnaryExpression);
-DERIVE_SYMBOL(BinaryExpression);
-DERIVE_SYMBOL(TernaryExpression);
+#define DERIVE_SYMBOL(TYPE, MEMBER) \
+struct TYPE : public NonTerminal { \
+  MEMBER \
+  TYPE() : NonTerminal() {} \
+  ~TYPE() {} \
+  virtual void Invoke(SymbolVisitor& visitor) override { \
+    bool use_base_impl = false; \
+    if (!visitor.Visit##TYPE(this)) { \
+      use_base_impl = true; \
+      visitor.VisitNonTerminal(this); \
+    } \
+    Symbol* cur = childs; \
+    while (cur) { \
+      cur->Invoke(visitor); \
+      cur = cur->right; \
+    } \
+    if (use_base_impl) { \
+      visitor.ExitNonTerminal(this); \
+    } else { \
+      visitor.Exit##TYPE(this); \
+    } \
+  } \
+}
 
+DUPLICATE_SYMBOL(AssignmentExpression);
+DUPLICATE_SYMBOL(BinaryExpression);
+DUPLICATE_SYMBOL(Declaration);
+DUPLICATE_SYMBOL(DeclarationSpecifiers);
+DUPLICATE_SYMBOL(Declarator);
+DUPLICATE_SYMBOL(DirectDeclarator);
+DUPLICATE_SYMBOL(InitDeclarator);
+// DERIVE_SYMBOL(InitDeclarator, bool is_pointer = false;);
+DUPLICATE_SYMBOL(Initializer);
+DUPLICATE_SYMBOL(Root);
+DUPLICATE_SYMBOL(TernaryExpression);
+DUPLICATE_SYMBOL(UnaryExpression);
+
+#undef DUPLICATE_SYMBOL
 #undef DERIVE_SYMBOL
 
 // TODO: add more internal node type 

@@ -13,16 +13,18 @@ namespace juicyc {
 
 struct CompilerOptions {
   std::vector<std::string> files;
-  std::string dump_output;
-  std::string output;
+  std::string json_output;
+  std::string ir_output;
+  std::string obj_output;
   // optional
   InputSystem* isys = nullptr;
   OutputSystem* osys = nullptr;
   CompilerOptions() = default;
   CompilerOptions(const CompilerOptions& rhs)
       : files(rhs.files),
-        dump_output(rhs.dump_output),
-        output(rhs.output),
+        json_output(rhs.json_output),
+        ir_output(rhs.ir_output),
+        obj_output(rhs.obj_output),
         isys(rhs.isys),
         osys(rhs.osys) {}
   ~CompilerOptions() { }
@@ -33,9 +35,7 @@ class Compiler {
   Compiler() = default;
   ~Compiler() { }
   // preprocessor + scanner + parser
-  virtual Status Parse() = 0;
-  virtual Status GenerateIR() = 0;
-  virtual Status GenerateAsm() = 0;
+  virtual Status Run() = 0;
   static std::unique_ptr<Compiler> NewCompiler(CompilerOptions option);
 };
 

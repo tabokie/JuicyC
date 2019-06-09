@@ -5,7 +5,7 @@
 #include "juicyc/preprocessor.h"
 #include "frontend/front_env.h"
 #include "visitor/json_dumper.h"
-#include "visitor/llvm_ir_visitor.h"
+#include "visitor/syntax_visitor.h"
 
 namespace juicyc {
 
@@ -14,28 +14,27 @@ class CompilerImpl : public Compiler {
   CompilerImpl(CompilerOptions opts) : opts_(opts) { Init(); }
   ~CompilerImpl() { }
   // preprocessor + scanner + parser
-  Status Parse() override {
+  Status Run() override {
     FrontEnv::pp->seek();
   	auto s = FrontEnv::Parse();
   	if (s.ok() &&
-  		  FrontEnv::root &&
-  		  opts_.dump_output.size() > 0) {
-      LLVMIRVisitor visitor;
+  		  FrontEnv::root) {
+      SyntaxVisitor visitor(&env_);
       FrontEnv::root->Invoke(visitor);
       s = visitor.status();
-      if (s.ok() && opts_.dump_output.size() > 0) {
-        JsonDumper dumper(opts_.dump_output, &env_);
+      if (s.ok() && opts_.ir_output.size() > 0) {
+        s = visitor.context().ExportIR(opts_.ir_output);
+      }
+      if (s.ok() && opts_.obj_output.size() > 0) {
+        s = visitor.context().ExportObj(opts_.obj_output);
+      }
+      if (s.ok() && opts_.json_output.size() > 0) {
+        JsonDumper dumper(opts_.json_output, &env_);
         FrontEnv::root->Invoke(dumper);
         s = dumper.status();
       }
   	}
   	return s;
-  }
-  Status GenerateIR() override {
-  	return Status::NotSupported("not implemented");
-  }
-  Status GenerateAsm() override {
-  	return Status::NotSupported("not implemented");
   }
  private:
  	CompilerOptions opts_;

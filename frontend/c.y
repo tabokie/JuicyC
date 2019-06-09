@@ -6,11 +6,7 @@
 void yyerror(const char *s);
 int yylex();
 
-using juicyc::Terminal;
-using juicyc::NonTerminal;
-using juicyc::UnaryExpression;
-using juicyc::BinaryExpression;
-using juicyc::TernaryExpression;
+using namespace juicyc;
 
 template <typename SymType, typename YaccType, class ...YaccChild>
 void BUILD(const char* name, YaccType& root, YaccType& first, YaccChild... childs) {
@@ -201,8 +197,8 @@ conditional_expression
   ;
 
 assignment_expression
-  : conditional_expression {BUILD<NonTerminal>("assignment_expression", $$, $1);}
-  | unary_expression assignment_operator assignment_expression {BUILD<NonTerminal>("assignment_expression", $$, $1, $2, $3);}
+  : conditional_expression {BUILD<AssignmentExpression>("assignment_expression", $$, $1);}
+  | unary_expression assignment_operator assignment_expression {BUILD<AssignmentExpression>("assignment_expression", $$, $1, $2, $3);}
   ;
 
 assignment_operator
@@ -229,29 +225,29 @@ constant_expression
   ;
 
 declaration
-  : declaration_specifiers ';' {BUILD<NonTerminal>("declaration", $$, $1, $2);}
-  | declaration_specifiers init_declarator_list ';' {BUILD<NonTerminal>("declaration", $$, $1, $2, $3);}
+  : declaration_specifiers ';' {BUILD<Declaration>("declaration", $$, $1, $2);}
+  | declaration_specifiers init_declarator_list ';' {BUILD<Declaration>("declaration", $$, $1, $2, $3);}
   ;
 
 declaration_specifiers
-  : storage_class_specifier {BUILD<NonTerminal>("declaration_specifiers", $$, $1);}
-  | storage_class_specifier declaration_specifiers {BUILD<NonTerminal>("declaration_specifiers", $$, $1, $2);}
-  | type_specifier {BUILD<NonTerminal>("declaration_specifiers", $$, $1);}
-  | type_specifier declaration_specifiers {BUILD<NonTerminal>("declaration_specifiers", $$, $1, $2);}
-  | type_qualifier {BUILD<NonTerminal>("declaration_specifiers", $$, $1);}
-  | type_qualifier declaration_specifiers {BUILD<NonTerminal>("declaration_specifiers", $$, $1, $2);}
-  | function_specifier {BUILD<NonTerminal>("declaration_specifiers", $$, $1);}
-  | function_specifier declaration_specifiers {BUILD<NonTerminal>("declaration_specifiers", $$, $1, $2);}
+  : storage_class_specifier {BUILD<DeclarationSpecifiers>("declaration_specifiers", $$, $1);}
+  | storage_class_specifier declaration_specifiers {BUILD<DeclarationSpecifiers>("declaration_specifiers", $$, $1, $2);}
+  | type_specifier {BUILD<DeclarationSpecifiers>("declaration_specifiers", $$, $1);}
+  | type_specifier declaration_specifiers {BUILD<DeclarationSpecifiers>("declaration_specifiers", $$, $1, $2);}
+  | type_qualifier {BUILD<DeclarationSpecifiers>("declaration_specifiers", $$, $1);}
+  | type_qualifier declaration_specifiers {BUILD<DeclarationSpecifiers>("declaration_specifiers", $$, $1, $2);}
+  | function_specifier {BUILD<DeclarationSpecifiers>("declaration_specifiers", $$, $1);}
+  | function_specifier declaration_specifiers {BUILD<DeclarationSpecifiers>("declaration_specifiers", $$, $1, $2);}
   ;
 
 init_declarator_list
-  : init_declarator {BUILD<NonTerminal>("init_declarator_list", $$, $1);}
-  | init_declarator_list ',' init_declarator {BUILD<NonTerminal>("init_declarator_list", $$, $1, $2, $3);}
+  : init_declarator {BUILD<InitDeclarator>("init_declarator_list", $$, $1);}
+  | init_declarator_list ',' init_declarator {BUILD<InitDeclarator>("init_declarator_list", $$, $1, $2, $3);}
   ;
 
 init_declarator
-  : declarator {BUILD<NonTerminal>("init_declarator", $$, $1);}
-  | declarator '=' initializer {BUILD<NonTerminal>("init_declarator", $$, $1, $2, $3);}
+  : declarator {BUILD<InitDeclarator>("init_declarator", $$, $1);}
+  | declarator '=' initializer {BUILD<InitDeclarator>("init_declarator", $$, $1, $2, $3);}
   ;
 
 storage_class_specifier
@@ -345,25 +341,25 @@ function_specifier
   ;
 
 declarator
-  : pointer direct_declarator {BUILD<NonTerminal>("declarator", $$, $1, $2);}
-  | direct_declarator {BUILD<NonTerminal>("declarator", $$, $1);}
+  : pointer direct_declarator {BUILD<Declarator>("declarator", $$, $1, $2);}
+  | direct_declarator {BUILD<Declarator>("declarator", $$, $1);}
   ;
 
 
 direct_declarator
-  : IDENTIFIER {BUILD<NonTerminal>("direct_declarator", $$, $1);}
-  | '(' declarator ')' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3);}
-  | direct_declarator '[' type_qualifier_list assignment_expression ']' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3, $4, $5);}
-  | direct_declarator '[' type_qualifier_list ']' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3, $4);}
-  | direct_declarator '[' assignment_expression ']' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3, $4);}
-  | direct_declarator '[' STATIC type_qualifier_list assignment_expression ']' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3, $4, $5, $6);}
-  | direct_declarator '[' type_qualifier_list STATIC assignment_expression ']' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3, $4, $5, $6);}
-  | direct_declarator '[' type_qualifier_list '*' ']' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3, $4, $5);}
-  | direct_declarator '[' '*' ']' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3, $4);}
-  | direct_declarator '[' ']' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3);}
-  | direct_declarator '(' parameter_type_list ')' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3, $4);}
-  | direct_declarator '(' identifier_list ')' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3, $4);}
-  | direct_declarator '(' ')' {BUILD<NonTerminal>("direct_declarator", $$, $1, $2, $3);}
+  : IDENTIFIER {BUILD<DirectDeclarator>("direct_declarator", $$, $1);}
+  | '(' declarator ')' {BUILD<DirectDeclarator>("direct_declarator", $$, $1, $2, $3);}
+  | direct_declarator '[' type_qualifier_list assignment_expression ']' {BUILD<DirectDeclarator>("direct_declarator", $$, $1, $2, $3, $4, $5);}
+  | direct_declarator '[' type_qualifier_list ']' {BUILD<DirectDeclarator>("direct_declarator", $$, $1, $2, $3, $4);}
+  | direct_declarator '[' assignment_expression ']' {BUILD<DirectDeclarator>("direct_declarator", $$, $1, $2, $3, $4);}
+  | direct_declarator '[' STATIC type_qualifier_list assignment_expression ']' {BUILD<DirectDeclarator>("direct_declarator", $$, $1, $2, $3, $4, $5, $6);}
+  | direct_declarator '[' type_qualifier_list STATIC assignment_expression ']' {BUILD<DirectDeclarator>("direct_declarator", $$, $1, $2, $3, $4, $5, $6);}
+  | direct_declarator '[' type_qualifier_list '*' ']' {BUILD<DirectDeclarator>("direct_declarator", $$, $1, $2, $3, $4, $5);}
+  | direct_declarator '[' '*' ']' {BUILD<DirectDeclarator>("direct_declarator", $$, $1, $2, $3, $4);}
+  | direct_declarator '[' ']' {BUILD<DirectDeclarator>("direct_declarator", $$, $1, $2, $3);}
+  | direct_declarator '(' parameter_type_list ')' {BUILD<DirectDeclarator>("direct_declarator", $$, $1, $2, $3, $4);}
+  | direct_declarator '(' identifier_list ')' {BUILD<DirectDeclarator>("direct_declarator", $$, $1, $2, $3, $4);}
+  | direct_declarator '(' ')' {BUILD<DirectDeclarator>("direct_declarator", $$, $1, $2, $3);}
   ;
 
 pointer
@@ -426,9 +422,9 @@ direct_abstract_declarator
   ;
 
 initializer
-  : assignment_expression {BUILD<NonTerminal>("initializer", $$, $1);}
-  | '{' initializer_list '}' {BUILD<NonTerminal>("initializer", $$, $1, $2, $3);}
-  | '{' initializer_list ',' '}' {BUILD<NonTerminal>("initializer", $$, $1, $2, $3, $4);}
+  : assignment_expression {BUILD<Initializer>("initializer", $$, $1);}
+  | '{' initializer_list '}' {BUILD<Initializer>("initializer", $$, $1, $2, $3);}
+  | '{' initializer_list ',' '}' {BUILD<Initializer>("initializer", $$, $1, $2, $3, $4);}
   ;
 
 initializer_list
@@ -511,8 +507,8 @@ jump_statement
   ;
 
 translation_unit
-  : external_declaration {BUILD<NonTerminal>("translation_unit", $$, $1); juicyc::FrontEnv::root = $$;}
-  | translation_unit external_declaration {BUILD<NonTerminal>("translation_unit", $$, $1, $2); juicyc::FrontEnv::root = $$;}
+  : external_declaration {BUILD<Root>("translation_unit", $$, $1); juicyc::FrontEnv::root = $$;}
+  | translation_unit external_declaration {BUILD<Root>("translation_unit", $$, $1, $2); juicyc::FrontEnv::root = $$;}
   ;
 
 external_declaration

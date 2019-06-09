@@ -1,5 +1,5 @@
-#ifndef JUICYC_VISITOR_IR_TYPE_H_
-#define JUICYC_VISITOR_IR_TYPE_H_
+#ifndef JUICYC_VISITOR_SYNTAX_TYPE_H_
+#define JUICYC_VISITOR_SYNTAX_TYPE_H_
 
 #include <llvm/IR/Type.h>
 #include <llvm/IR/DerivedTypes.h>
@@ -8,9 +8,10 @@
 #include <cstdint>
 #include <memory>
 #include <map>
+#include <iostream>
 
 namespace juicyc {
-namespace llvm_ir {
+namespace syntax {
 
 enum InternalTypeID {
   kPrimitive = 1,
@@ -26,13 +27,17 @@ struct InternalType : std::enable_shared_from_this<InternalType> {
 
   InternalType() = default;
   InternalType(llvm::Type* t) : llvm(t) {}
-  InternalType(const InternalType& rhs) : llvm(rhs.llvm), id(rhs.id) {}
-  InternalType(InternalType&& rhs) : llvm(rhs.llvm), id(rhs.id) {}
+  InternalType(const InternalType& rhs)
+      : std::enable_shared_from_this<InternalType>(rhs), 
+        llvm(rhs.llvm), id(rhs.id) {}
+  InternalType(InternalType&& rhs)
+      : std::enable_shared_from_this<InternalType>(std::move(rhs)),
+        llvm(rhs.llvm), id(rhs.id) {}
   virtual std::string ToString() {
     if (!llvm) return "NilTy";
     auto p = llvm_type_to_string_.find(llvm->getTypeID());
     if (p != llvm_type_to_string_.end()) return p->second;
-    return "UnknownTy";   
+    return "UnknownTy";
   }
   virtual std::shared_ptr<InternalType> pointer();
   virtual std::shared_ptr<InternalType> array(uint32_t count);
@@ -83,7 +88,7 @@ struct Struct : public InternalType {
 
 };
 
-}  // namespace llvm_ir
+}  // namespace syntax
 }  // namespace juicyc
 
-#endif  // JUICYC_VISITOR_IR_TYPE_H_
+#endif  // JUICYC_VISITOR_SYNTAX_TYPE_H_

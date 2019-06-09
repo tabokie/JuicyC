@@ -76,6 +76,7 @@ struct StringUtil {
     if(cur < str.size()) ret.push_back(str.substr(cur)); // don;t split tail
     return ret.size() - count;
   }
+
   static int split(std::string& str,
                    std::string token,
                    std::vector<std::string>& ret) {
@@ -92,16 +93,19 @@ struct StringUtil {
     }
     return ret.size() - count;
   }
+
   static bool starts_with(std::string& a, std::string b) {
     if(a.size() < b.size()) return false;
     return a.compare(0, b.size(), b) == 0;
   }
+
   static bool ends_with(std::string& a, std::string b) {
     if(a.size() < b.size()) return false;
     return b.compare(0, b.size(),
                      a.c_str() + a.size() - b.size(),
                      b.size()) == 0;
   }
+
   static bool starts_with(const char* p, std::string b, int len) {
     register int i = 0;
     while (p[i] && i < b.size() && i < len) {
@@ -110,9 +114,11 @@ struct StringUtil {
     }
     return i >= b.size();
   }
+
   static bool ends_with(const char* p, std::string b, int len) {
     return starts_with(p + len - b.size(), b, len - b.size());
   }
+
   static std::string identifier(const char* p, int len) {
     register int end = 0;
     register char c;
@@ -145,6 +151,57 @@ struct StringUtil {
   }
 };
 
+
+
+class Logger {
+
+ public:
+  void trace(std::string context) {
+    trace_buffer_[head_++] = context;
+    if (head_ >= trace_buffer_size_) head_ = 0;
+  }
+  void output_trace(std::ostream& os) {
+    for (int i = 0; i < trace_buffer_size_; i++) {
+      os << "[" << std::to_string(i) << "]"
+         << trace_buffer_[(head_ + i) % trace_buffer_size_]
+         << std::endl;
+    }
+  }
+  void set_cursor(std::string c) { cursor_ = c; }
+  void warning(std::string message) {
+    warnings_.push_back(cursor_ + message);
+  }
+  int num_warning() { return warnings_.size(); }
+  void output_warning(std::ostream& os) {
+    for (auto& w : warnings_) {
+      os << "warning: " << w << std::endl;
+    }
+  }
+  void error(std::string message) {
+    std::cout << message << std::endl;
+    errors_.push_back(cursor_ + message);
+  }
+  int num_error() { return errors_.size(); }
+  void output_error(std::ostream& os) {
+    for (auto& e : errors_) {
+      os << "error: " << e << std::endl;
+    }
+  }
+  void clear() {
+    head_ = 0;
+    for (int i = 0; i < trace_buffer_size_; i++)
+      trace_buffer_[i] = "";
+    warnings_.clear();
+    errors_.clear();
+  }
+ private:
+  static constexpr int16_t trace_buffer_size_ = 16;
+  std::string trace_buffer_[trace_buffer_size_];
+  int head_ = 0;
+  std::string cursor_;
+  std::vector<std::string> warnings_;
+  std::vector<std::string> errors_;
+};
 
 } // namespace juicyc
 

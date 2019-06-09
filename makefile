@@ -14,7 +14,7 @@ TEST_FLAG = /link /subsystem:console
 # llvm library should include gtest
 # TEST_LIB = gtest.lib gtest_main.lib
 LLVM_LIB = $(LLVM_PATH)/lib/*.lib
-SRC = frontend/*.cc util/*.cc compiler/*.cc visitor/ir/*.cc
+SRC = frontend/*.cc util/*.cc compiler/*.cc visitor/syntax/*.cc
 CMD = cmd/*.cc
 
 # to fix `spawn failed error` for now

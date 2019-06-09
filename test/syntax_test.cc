@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 
-#include "visitor/ir/context.h"
-#include "visitor/ir/type_checker.h"
+#include "visitor/syntax/context.h"
+#include "visitor/syntax/type_checker.h"
 
-using namespace juicyc::llvm_ir;
+using namespace juicyc::syntax;
 using namespace llvm;
 
-TEST(IRTypeCheckerTest, StringRep) {
+TEST(SyntaxTypeCheckerTest, StringRep) {
   Context context;
   TypeChecker checker(&context);
   InternalTypePtr type = checker.FromString("int");
