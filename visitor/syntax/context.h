@@ -29,13 +29,14 @@ namespace syntax {
 
 struct Context {
   Env* env = nullptr;
+  std::string name;
   llvm::LLVMContext llvm;
   llvm::IRBuilder<> builder;
   std::unique_ptr<llvm::Module> module;
   Logger logger;
 
-  Context() : builder(llvm) {
-    module = std::unique_ptr<llvm::Module>(new llvm::Module("main", llvm));
+  Context(std::string _name) : name(_name), builder(llvm) {
+    module = std::unique_ptr<llvm::Module>(new llvm::Module(name, llvm));
   }
   Status ExportIR(std::string filename) {
     FunctionGuard g(std::cout, "ExportIR");

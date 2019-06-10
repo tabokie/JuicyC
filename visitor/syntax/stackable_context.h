@@ -55,6 +55,13 @@ struct StackableContext {
 	~StackableContext() {}
 };
 
+struct GlobalContext {
+	IdentifierTable identifier;
+
+	GlobalContext() = default;
+	~GlobalContext() {}
+};
+
 }  // namespace syntax
 }  // namespace juicyc
 

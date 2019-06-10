@@ -17,6 +17,7 @@
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/IR/IRPrintingPasses.h>
 #include <llvm/Support/raw_ostream.h>
+#include <llvm/Support/Casting.h>
 
 #include <iostream>
 
@@ -24,7 +25,8 @@ namespace juicyc {
 
 class SyntaxVisitor : public SymbolVisitor {
  public:
-  SyntaxVisitor(Env* env) {
+  SyntaxVisitor(Env* env) : SyntaxVisitor(env, "main") {}
+  SyntaxVisitor(Env* env, std::string name) : context_(name) {
     context_.env = env;
     type_checker_.set_context(&context_);
   };
@@ -63,6 +65,7 @@ class SyntaxVisitor : public SymbolVisitor {
   void ExitNonTerminal(NonTerminal* n) {}
   bool VisitRoot(Root* root) {
     context_.logger.trace(std::string("VisitRoot"));
+    /*
     context_stack_.push_back(syntax::StackableContext());
     std::vector<llvm::Type*> args;
     llvm::FunctionType* type = llvm::FunctionType::get(
@@ -78,6 +81,7 @@ class SyntaxVisitor : public SymbolVisitor {
         context_.llvm, "entry", function);
     context_.builder.SetInsertPoint(block);
     context_stack_.back().llvm = block;
+    */
     return true;
   }
 
@@ -270,14 +274,34 @@ class SyntaxVisitor : public SymbolVisitor {
     // do initializaton here
     syntax::Identifier identifier = identifier_stack_.back();
     identifier_stack_.pop_back();
-    if (decl->childs->right && decl->childs->right->type == '=') {
-      // initialization
-      llvm::Value* v = value_stack_.back();
+    bool init = (decl->childs->right && decl->childs->right->type == '=');
+    llvm::Value* v = nullptr;
+    if (init) {
+      v = value_stack_.back();
       value_stack_.pop_back();
       v = type_checker_.CastTo(v, identifier.type->llvm);
-      context_.builder.CreateStore(v, identifier.value);
+    } else {
+      v = identifier.type->default_value();
     }
-    context_stack_.back().identifier.Insert(identifier);
+    if (v) {  // null means no need for init
+      if (context_stack_.size() == 0) {
+        // global
+        auto pv = llvm::dyn_cast<llvm::GlobalVariable>(identifier.value);
+        if (!pv) {
+          context_.logger.error("Identifier not of type GlobalVariable");
+        }
+        auto pi = llvm::dyn_cast<llvm::Constant>(v);
+        if (!pi) {
+          context_.logger.error("Global initializer not of type Constant");
+        }
+        pv->setInitializer(pi);
+        global_.identifier.Insert(identifier);
+      } else {
+        // local
+        context_.builder.CreateStore(v, identifier.value);
+        context_stack_.back().identifier.Insert(identifier);
+      }
+    }
   }
 
   bool VisitDeclarator(Declarator* decl) {
@@ -303,17 +327,32 @@ class SyntaxVisitor : public SymbolVisitor {
         context_.logger.error(
             "Unexpected: empty type stack in direct-declarator");
       } else {
-        std::cout << __LINE__ << std::endl;
         Terminal* p = reinterpret_cast<Terminal*>(decl->childs);
         assert(type_stack_.back()->llvm != nullptr);
         std::cout << type_stack_.back()->ToString() << std::endl;
-        std::cout << __LINE__ << std::endl;
-        llvm::Value* v =
-            context_.builder.CreateAlloca(type_stack_.back()->llvm);
-        std::cout << __LINE__ << std::endl;
+        llvm::Value* v = nullptr;
+        if (context_stack_.size() == 0) {
+          // global variable
+          llvm::GlobalVariable* variable = new llvm::GlobalVariable(
+              *(context_.module),
+              type_stack_.back()->llvm,
+              false, // is constant
+              llvm::GlobalValue::CommonLinkage,
+              0,
+              p->value);
+          variable->setAlignment(4);
+          v = variable;
+        } else {
+          // local variable
+          v = context_.builder.CreateAlloca(type_stack_.back()->llvm);
+        }
+        if (!v) {
+          context_.logger.error(
+              std::string("Unexpected: null value when making ") +
+              p->value);
+        }
         identifier_stack_.push_back(
-            syntax::Identifier(p->value, type_stack_.back(), v));
-        std::cout << __LINE__ << std::endl;
+            syntax::Identifier(p->value, type_stack_.back(), v));  
       }
     }
     return true;
@@ -342,6 +381,7 @@ class SyntaxVisitor : public SymbolVisitor {
   // construct area
   // match rule: if no exact match, choose unique castable,
   // or raise an ambiguity error.
+  syntax::GlobalContext global_;
   std::vector<syntax::StackableContext> context_stack_;
 };
 

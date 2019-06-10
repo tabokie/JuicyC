@@ -7,7 +7,7 @@ using namespace juicyc::syntax;
 using namespace llvm;
 
 TEST(SyntaxTypeCheckerTest, StringRep) {
-  Context context;
+  Context context("main");
   TypeChecker checker(&context);
   InternalTypePtr type = checker.FromString("int");
   EXPECT_TRUE(type->llvm != nullptr);

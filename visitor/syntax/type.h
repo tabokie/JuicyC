@@ -3,6 +3,8 @@
 
 #include <llvm/IR/Type.h>
 #include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/Constants.h>
+#include <llvm/Support/Casting.h>
 
 #include <string>
 #include <cstdint>
@@ -41,6 +43,17 @@ struct InternalType : std::enable_shared_from_this<InternalType> {
   }
   virtual std::shared_ptr<InternalType> pointer();
   virtual std::shared_ptr<InternalType> array(uint32_t count);
+  virtual llvm::Value* default_value() {
+    auto _id = llvm->getTypeID();
+    if (_id == llvm::Type::IntegerTyID) {
+      return llvm::ConstantInt::get(llvm, 0, true);
+    } else if(_id == llvm::Type::FloatTyID ||
+              _id == llvm::Type::DoubleTyID) {
+      return llvm::ConstantFP::get(llvm, 0);
+    } else {
+      return nullptr;
+    }
+  }
   static std::map<llvm::Type::TypeID, std::string>
       llvm_type_to_string_;
 };
@@ -55,6 +68,10 @@ struct Pointer : public InternalType {
   Pointer(Pointer&& rhs) : InternalType(rhs), pointee(rhs.pointee) {}
   std::string ToString() override {
     return pointee->ToString() + "*";
+  }
+  llvm::Value* default_value() override {
+    return llvm::ConstantPointerNull::get(
+        llvm::dyn_cast<llvm::PointerType>(llvm));
   }
  private:
   void MakeType() {
@@ -75,6 +92,9 @@ struct Array : public InternalType {
   std::string ToString() override {
     return pointee->ToString() + "[" + std::to_string(count) + "]";
   }
+  llvm::Value* default_value() override {
+    return nullptr;
+  }
  private:
   void MakeType() {
     id = kArray;
@@ -84,9 +104,9 @@ struct Array : public InternalType {
   }
 };
 
-struct Struct : public InternalType {
+// struct Struct : public InternalType {
 
-};
+// };
 
 }  // namespace syntax
 }  // namespace juicyc
