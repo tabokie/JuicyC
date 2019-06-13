@@ -1,0 +1,72 @@
+{"translation_unit": {
+  "external_declaration": {
+    "function_definition": {
+      "declaration_specifiers": {
+        "type_specifier": {
+          "terminal-0": {
+            "value": "void",
+            "file": "0",
+            "line": "1"
+          }
+        }
+      },
+      "declarator": {
+        "direct_declarator": {
+          "direct_declarator": {
+            "terminal-1": {
+              "value": "main",
+              "file": "0",
+              "line": "1"
+            }
+          },
+          "terminal-2": {
+            "value": "(",
+            "file": "0",
+            "line": "1"
+          },
+          "parameter_type_list": {
+            "parameter_list": {
+              "parameter_declaration": {
+                "declaration_specifiers": {
+                  "type_specifier": {
+                    "terminal-3": {
+                      "value": "int",
+                      "file": "0",
+                      "line": "1"
+                    }
+                  }
+                },
+                "declarator": {
+                  "direct_declarator": {
+                    "terminal-4": {
+                      "value": "a",
+                      "file": "0",
+                      "line": "1"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "terminal-5": {
+            "value": ")",
+            "file": "0",
+            "line": "1"
+          }
+        }
+      },
+      "compound_statement": {
+        "terminal-6": {
+          "value": "{",
+          "file": "0",
+          "line": "1"
+        },
+        "terminal-7": {
+          "value": "}",
+          "file": "0",
+          "line": "1"
+        }
+      }
+    }
+  }
+}}

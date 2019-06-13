@@ -14,15 +14,23 @@ class JsonDumper : public SymbolVisitor {
   JsonDumper(std::string output, Env* env)
       : output_(output),
         env_(env) { Init(); }
-  ~JsonDumper() { env_->output_system()->fclose(os_); }
+  ~JsonDumper() {
+    (*os_) << "\n}";
+    env_->output_system()->fclose(os_);
+  }
   void VisitTerminal(Terminal* n) override {
     if (!block_head_) {
       (*os_) << ",\n";
     } else block_head_ = false;
     (*os_) << std::string(indent_, ' ')
-           << "\"value\": "
-           // << static_cast<int>(n->type)
-           << "\"" << (n->value) << "\"";
+           << "\"terminal-" << (terminal_id_++) << "\": {\n";
+    (*os_) << std::string(indent_ + 2, ' ')
+           << "\"value\": \"" << (n->value) << "\",\n";
+    (*os_) << std::string(indent_ + 2, ' ')
+           << "\"file\": \"" << (n->file) << "\",\n";
+    (*os_) << std::string(indent_ + 2, ' ')
+           << "\"line\": \"" << (n->line) << "\"\n";
+    (*os_) << std::string(indent_, ' ') << "}";
   }
   void ExitTerminal(Terminal* n) override {}
   void VisitNonTerminal(NonTerminal* n) override {
@@ -48,11 +56,13 @@ class JsonDumper : public SymbolVisitor {
   Env* env_;
   OStreamPtr os_;
   Status status_;
+  uint64_t terminal_id_ = 0;
 
   bool block_head_ = true;
-  int indent_ = 0;
+  int indent_ = 2;
   void Init() {
     os_ = env_->output_system()->fopen(output_);
+    (*os_) << "{\n";
   }
 };
 

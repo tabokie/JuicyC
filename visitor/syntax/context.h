@@ -21,6 +21,7 @@
 #include <llvm/Support/FormattedStream.h>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/IR/LegacyPassManager.h>
+#include <llvm/IR/Verifier.h>
 
 #include <iostream>
 
@@ -37,9 +38,14 @@ struct Context {
 
   Context(std::string _name) : name(_name), builder(llvm) {
     module = std::unique_ptr<llvm::Module>(new llvm::Module(name, llvm));
+    Init();
   }
+  void Init() {}
   Status ExportIR(std::string filename) {
     FunctionGuard g(std::cout, "ExportIR");
+    if (llvm::verifyModule(*module, &llvm::errs())) {
+      return Status::Corruption("Module corrupted");
+    }
     // std::error_code ec;
     // llvm::raw_string_ostream dest("content");
     // llvm::raw_os_ostream dest(*env->fopen("out.ir"));
@@ -65,9 +71,7 @@ struct Context {
     module->setTargetTriple(targetTriple);
     std::string error;
     auto target = llvm::TargetRegistry::lookupTarget(targetTriple, error);
-    if (!target) {
-      return Status::Corruption(error);
-    }
+    assert(target);
     auto cpu = "generic";
     auto feature = "";
     llvm::TargetOptions opts;
@@ -89,6 +93,7 @@ struct Context {
       return Status::IOError("file type failed");
     }
     pass.run(*module);
+	std::cout << "after pass run" << std::endl;
     dest.flush();
     // env->output_system()->fclose(os);
     return Status::OK();

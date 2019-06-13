@@ -6,9 +6,9 @@
           "type_specifier": {
               "terminal-0": {
                 "value": "int", 
-                "file": "xxx", 
-                "line": "xxx",
-                "column": "xxx"
+                "file": "main.c", 
+                "line": "0",
+                "column": "0"
               }
           }
         },
@@ -18,25 +18,25 @@
               "direct_declarator": {
                 "terminal-1": {
                   "value": "a", 
-                  "file": "xxx", 
-                  "line": "xxx",
-                  "column": "xxx"
+                  "file": "main.c", 
+                  "line": "0",
+                  "column": "0"
                 }
               }
             },
             "terminal-2": {
                 "value": "=", 
-                "file": "xxx", 
-                "line": "xxx",
-                "column": "xxx"
+                "file": "main.c", 
+                "line": "0",
+                "column": "0"
             },
             "initializer": {
               "primary_expression": {
                 "terminal-3": {
                   "value": "0", 
-                  "file": "xxx", 
-                  "line": "xxx",
-                  "column": "xxx"
+                  "file": "main.c", 
+                  "line": "0",
+                  "column": "0"
                 }
               }
             }

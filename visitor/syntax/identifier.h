@@ -5,11 +5,12 @@
 #include "type.h"
 
 #include <iostream>
+#include <memory>
 
 namespace juicyc {
 namespace syntax {
 
-struct Identifier {
+struct Identifier : std::enable_shared_from_this<Identifier> {
   std::string name;
   InternalTypePtr type = nullptr;
   llvm::Value* value = nullptr;
@@ -61,7 +62,39 @@ struct Identifier {
     }
     return nullptr;
   }
+
+  std::shared_ptr<Identifier> shared() { return shared_from_this(); }
 };
+
+using IdentifierPtr = std::shared_ptr<Identifier>;
+
+struct FunctionIdentifier {
+  std::string name;
+  std::string tag;
+  InternalTypePtr ret = nullptr;
+  std::vector<InternalTypePtr> args;
+  llvm::Value* value;
+  bool closed = false;
+
+  FunctionIdentifier(std::string _name,
+                     InternalTypePtr _ret,
+                     std::vector<InternalTypePtr> _args,
+                     llvm::Value* _value)
+      : name(_name),
+        ret(_ret),
+        args(_args),
+        value(_value) {}
+  FunctionIdentifier(const FunctionIdentifier& rhs)
+      : name(rhs.name),
+        tag(rhs.tag),
+        ret(rhs.ret),
+        args(rhs.args),
+        value(rhs.value),
+        closed(rhs.closed) {}
+  ~FunctionIdentifier() {}
+};
+
+using FunctionIdentifierPtr = std::shared_ptr<FunctionIdentifier>;
 
 }  // namespace syntax
 }  // namespace juicyc

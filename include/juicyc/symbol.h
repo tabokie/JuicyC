@@ -59,6 +59,15 @@ struct NonTerminal : public Symbol {
     }
     visitor.ExitNonTerminal(this);
   }
+  // get n-th child
+  Symbol* at(uint32_t n) {
+    if (!childs || n == 0) return childs;
+    Symbol* cur = childs;
+    for (uint32_t i = 0; i < n && cur; i++) {
+      cur = cur->right;
+    }
+    return cur;
+  }
 };
 
 #define DUPLICATE_SYMBOL(TYPE) \
@@ -110,16 +119,32 @@ struct TYPE : public NonTerminal { \
 
 DUPLICATE_SYMBOL(AssignmentExpression);
 DUPLICATE_SYMBOL(BinaryExpression);
+DUPLICATE_SYMBOL(CompoundStatement);
 DUPLICATE_SYMBOL(Declaration);
 DUPLICATE_SYMBOL(DeclarationSpecifiers);
 DUPLICATE_SYMBOL(Declarator);
 DUPLICATE_SYMBOL(DirectDeclarator);
+DUPLICATE_SYMBOL(ExpressionStatement);
+DUPLICATE_SYMBOL(FunctionDefinition);
+DUPLICATE_SYMBOL(LabeledStatement);
 DUPLICATE_SYMBOL(InitDeclarator);
-// DERIVE_SYMBOL(InitDeclarator, bool is_pointer = false;);
 DUPLICATE_SYMBOL(Initializer);
+DUPLICATE_SYMBOL(IterationStatement);
+DUPLICATE_SYMBOL(JumpStatement);
+DUPLICATE_SYMBOL(ParameterDeclaration);
+DUPLICATE_SYMBOL(ParameterList);
+DUPLICATE_SYMBOL(PostfixExpression);
 DUPLICATE_SYMBOL(Root);
+DUPLICATE_SYMBOL(SelectionStatement);
 DUPLICATE_SYMBOL(TernaryExpression);
 DUPLICATE_SYMBOL(UnaryExpression);
+
+// CompoundStatement
+// ExpressionStatement
+// SelectionStatement
+// IterationStatement
+// JumpStatement
+// LabeledStatement
 
 #undef DUPLICATE_SYMBOL
 #undef DERIVE_SYMBOL

@@ -93,16 +93,16 @@ primary_expression
   ;
 
 postfix_expression
-  : primary_expression {BUILD<NonTerminal>("postfix_expression", $$, $1);}
-  | postfix_expression '[' expression ']' {BUILD<NonTerminal>("postfix_expression", $$, $1, $2, $3, $4);}
-  | postfix_expression '(' ')' {BUILD<NonTerminal>("postfix_expression", $$, $1, $2, $3);}
-  | postfix_expression '(' argument_expression_list ')' {BUILD<NonTerminal>("postfix_expression", $$, $1, $2, $3, $4);}
-  | postfix_expression '.' IDENTIFIER {BUILD<NonTerminal>("postfix_expression", $$, $1, $2, $3);}
-  | postfix_expression PTR_OP IDENTIFIER {BUILD<NonTerminal>("postfix_expression", $$, $1, $2, $3);}
-  | postfix_expression INC_OP {BUILD<NonTerminal>("postfix_expression", $$, $1, $2);}
-  | postfix_expression DEC_OP {BUILD<NonTerminal>("postfix_expression", $$, $1, $2);}
-  | '(' type_name ')' '{' initializer_list '}' {BUILD<NonTerminal>("postfix_expression", $$, $1, $2, $3, $4, $5, $6);}
-  | '(' type_name ')' '{' initializer_list ',' '}' {BUILD<NonTerminal>("postfix_expression", $$, $1, $2, $3, $4, $5, $7);}
+  : primary_expression {BUILD<PostfixExpression>("postfix_expression", $$, $1);}
+  | postfix_expression '[' expression ']' {BUILD<PostfixExpression>("postfix_expression", $$, $1, $2, $3, $4);}
+  | postfix_expression '(' ')' {BUILD<PostfixExpression>("postfix_expression", $$, $1, $2, $3);}
+  | postfix_expression '(' argument_expression_list ')' {BUILD<PostfixExpression>("postfix_expression", $$, $1, $2, $3, $4);}
+  | postfix_expression '.' IDENTIFIER {BUILD<PostfixExpression>("postfix_expression", $$, $1, $2, $3);}
+  | postfix_expression PTR_OP IDENTIFIER {BUILD<PostfixExpression>("postfix_expression", $$, $1, $2, $3);}
+  | postfix_expression INC_OP {BUILD<PostfixExpression>("postfix_expression", $$, $1, $2);}
+  | postfix_expression DEC_OP {BUILD<PostfixExpression>("postfix_expression", $$, $1, $2);}
+  | '(' type_name ')' '{' initializer_list '}' {BUILD<PostfixExpression>("postfix_expression", $$, $1, $2, $3, $4, $5, $6);}
+  | '(' type_name ')' '{' initializer_list ',' '}' {BUILD<PostfixExpression>("postfix_expression", $$, $1, $2, $3, $4, $5, $7);}
   ;
 
 argument_expression_list
@@ -376,19 +376,19 @@ type_qualifier_list
 
 
 parameter_type_list
-  : parameter_list {BUILD<NonTerminal>("parameter_type_list", $$, $1);}
-  | parameter_list ',' ELLIPSIS {BUILD<NonTerminal>("parameter_type_list", $$, $1, $2, $3);}
+  : parameter_list {BUILD<ParameterList>("parameter_type_list", $$, $1);}
+  | parameter_list ',' ELLIPSIS {BUILD<ParameterList>("parameter_type_list", $$, $1, $2, $3);}
   ;
 
 parameter_list
-  : parameter_declaration {BUILD<NonTerminal>("parameter_list", $$, $1);}
-  | parameter_list ',' parameter_declaration {BUILD<NonTerminal>("parameter_list", $$, $1, $2, $3);}
+  : parameter_declaration {BUILD<ParameterList>("parameter_list", $$, $1);}
+  | parameter_list ',' parameter_declaration {BUILD<ParameterList>("parameter_list", $$, $1, $2, $3);}
   ;
 
 parameter_declaration
-  : declaration_specifiers declarator {BUILD<NonTerminal>("parameter_declaration", $$, $1, $2);}
-  | declaration_specifiers abstract_declarator {BUILD<NonTerminal>("parameter_declaration", $$, $1, $2);}
-  | declaration_specifiers {BUILD<NonTerminal>("parameter_declaration", $$, $1);}
+  : declaration_specifiers declarator {BUILD<ParameterDeclaration>("parameter_declaration", $$, $1, $2);}
+  | declaration_specifiers abstract_declarator {BUILD<ParameterDeclaration>("parameter_declaration", $$, $1, $2);}
+  | declaration_specifiers {BUILD<ParameterDeclaration>("parameter_declaration", $$, $1);}
   ;
 
 identifier_list
@@ -458,14 +458,14 @@ statement
   ;
 
 labeled_statement
-  : IDENTIFIER ':' statement {BUILD<NonTerminal>("labeled_statement", $$, $1, $2, $3);}
-  | CASE constant_expression ':' statement {BUILD<NonTerminal>("labeled_statement", $$, $1, $2, $3, $4);}
-  | DEFAULT ':' statement {BUILD<NonTerminal>("labeled_statement", $$, $1, $2, $3);}
+  : IDENTIFIER ':' statement {BUILD<LabeledStatement>("labeled_statement", $$, $1, $2, $3);}
+  | CASE constant_expression ':' statement {BUILD<LabeledStatement>("labeled_statement", $$, $1, $2, $3, $4);}
+  | DEFAULT ':' statement {BUILD<LabeledStatement>("labeled_statement", $$, $1, $2, $3);}
   ;
 
 compound_statement
-  : '{' '}' {BUILD<NonTerminal>("compound_statement", $$, $1, $2);}
-  | '{' block_item_list '}' {BUILD<NonTerminal>("compound_statement", $$, $1, $2, $3);}
+  : '{' '}' {BUILD<CompoundStatement>("compound_statement", $$, $1, $2);}
+  | '{' block_item_list '}' {BUILD<CompoundStatement>("compound_statement", $$, $1, $2, $3);}
   ;
 
 block_item_list
@@ -479,31 +479,31 @@ block_item
   ;
 
 expression_statement
-  : ';' {BUILD<NonTerminal>("expression_statement", $$, $1);}
-  | expression ';' {BUILD<NonTerminal>("expression_statement", $$, $1, $2);}
+  : ';' {BUILD<ExpressionStatement>("expression_statement", $$, $1);}
+  | expression ';' {BUILD<ExpressionStatement>("expression_statement", $$, $1, $2);}
   ;
 
 selection_statement
-  : IF '(' expression ')' statement %prec LOWER_THAN_ELSE
-  | IF '(' expression ')' statement ELSE statement {BUILD<NonTerminal>("selection_statement", $$, $1, $2, $3, $4, $5, $6, $7);}
-  | SWITCH '(' expression ')' statement {BUILD<NonTerminal>("selection_statement", $$, $1, $2, $3, $4, $5);}
+  : IF '(' expression ')' statement %prec LOWER_THAN_ELSE {BUILD<SelectionStatement>("selection_statement", $$, $1, $2, $3, $4, $5);}
+  | IF '(' expression ')' statement ELSE statement {BUILD<SelectionStatement>("selection_statement", $$, $1, $2, $3, $4, $5, $6, $7);}
+  | SWITCH '(' expression ')' statement {BUILD<SelectionStatement>("selection_statement", $$, $1, $2, $3, $4, $5);}
   ;
 
 iteration_statement
-  : WHILE '(' expression ')' statement {BUILD<NonTerminal>("iteration_statement", $$, $1, $2, $3, $4, $5);}
-  | DO statement WHILE '(' expression ')' ';' {BUILD<NonTerminal>("iteration_statement", $$, $1, $2, $3, $4, $5, $6, $7);}
-  | FOR '(' expression_statement expression_statement ')' statement {BUILD<NonTerminal>("iteration_statement", $$, $1, $2, $3, $4, $5, $6);}
-  | FOR '(' expression_statement expression_statement expression ')' statement {BUILD<NonTerminal>("iteration_statement", $$, $1, $2, $3, $4, $5, $6, $7);}
-  | FOR '(' declaration expression_statement ')' statement {BUILD<NonTerminal>("iteration_statement", $$, $1, $2, $3, $4, $5, $6);}
-  | FOR '(' declaration expression_statement expression ')' statement {BUILD<NonTerminal>("iteration_statement", $$, $1, $2, $3, $4, $5, $6, $7);}
+  : WHILE '(' expression ')' statement {BUILD<IterationStatement>("iteration_statement", $$, $1, $2, $3, $4, $5);}
+  | DO statement WHILE '(' expression ')' ';' {BUILD<IterationStatement>("iteration_statement", $$, $1, $2, $3, $4, $5, $6, $7);}
+  | FOR '(' expression_statement expression_statement ')' statement {BUILD<IterationStatement>("iteration_statement", $$, $1, $2, $3, $4, $5, $6);}
+  | FOR '(' expression_statement expression_statement expression ')' statement {BUILD<IterationStatement>("iteration_statement", $$, $1, $2, $3, $4, $5, $6, $7);}
+  | FOR '(' declaration expression_statement ')' statement {BUILD<IterationStatement>("iteration_statement", $$, $1, $2, $3, $4, $5, $6);}
+  | FOR '(' declaration expression_statement expression ')' statement {BUILD<IterationStatement>("iteration_statement", $$, $1, $2, $3, $4, $5, $6, $7);}
   ;
 
 jump_statement
-  : GOTO IDENTIFIER ';' {BUILD<NonTerminal>("jump_statement", $$, $1, $2);}
-  | CONTINUE ';' {BUILD<NonTerminal>("jump_statement", $$, $1, $2);}
-  | BREAK ';' {BUILD<NonTerminal>("jump_statement", $$, $1, $2);}
-  | RETURN ';' {BUILD<NonTerminal>("jump_statement", $$, $1, $2);}
-  | RETURN expression ';' {BUILD<NonTerminal>("jump_statement", $$, $1, $2);}
+  : GOTO IDENTIFIER ';' {BUILD<JumpStatement>("jump_statement", $$, $1, $2);}
+  | CONTINUE ';' {BUILD<JumpStatement>("jump_statement", $$, $1, $2);}
+  | BREAK ';' {BUILD<JumpStatement>("jump_statement", $$, $1, $2);}
+  | RETURN ';' {BUILD<JumpStatement>("jump_statement", $$, $1, $2);}
+  | RETURN expression ';' {BUILD<JumpStatement>("jump_statement", $$, $1, $2);}
   ;
 
 translation_unit
@@ -517,8 +517,8 @@ external_declaration
   ;
 
 function_definition
-  : declaration_specifiers declarator declaration_list compound_statement {BUILD<NonTerminal>("function_definition", $$, $1, $2, $3, $4);}
-  | declaration_specifiers declarator compound_statement {BUILD<NonTerminal>("function_definition", $$, $1, $2, $3);}
+  : declaration_specifiers declarator declaration_list compound_statement {BUILD<FunctionDefinition>("function_definition", $$, $1, $2, $3, $4);}
+  | declaration_specifiers declarator compound_statement {BUILD<FunctionDefinition>("function_definition", $$, $1, $2, $3);}
   ;
 
 declaration_list

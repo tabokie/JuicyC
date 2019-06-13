@@ -80,6 +80,19 @@ class TypeChecker {
     }
     return nullptr;
   }
+  bool Castable(const llvm::Type* from, const llvm::Type* to) {
+    if (from == to) return true;
+    llvm::Type::TypeID from_id = from->getTypeID();
+    llvm::Type::TypeID to_id = to->getTypeID();
+    if (from_id == llvm::Type::IntegerTyID ||
+        from_id == llvm::Type::FloatTyID && to_id != llvm::Type::IntegerTyID) {
+      return true;
+    }
+    return false;
+  }
+  std::string Tag(const std::vector<InternalTypePtr>& args) {
+    return "";
+  }
  private:
   Context* context_ = nullptr;
   static std::unordered_map<std::string, std::function<llvm::Type*(llvm::LLVMContext&)>>

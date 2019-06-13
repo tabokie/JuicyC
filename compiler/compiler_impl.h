@@ -19,19 +19,21 @@ class CompilerImpl : public Compiler {
   	auto s = FrontEnv::Parse();
   	if (s.ok() &&
   		  FrontEnv::root) {
-      SyntaxVisitor visitor(&env_);
-      FrontEnv::root->Invoke(visitor);
-      s = visitor.status();
-      if (s.ok() && opts_.ir_output.size() > 0) {
-        s = visitor.context().ExportIR(opts_.ir_output);
-      }
-      if (s.ok() && opts_.obj_output.size() > 0) {
-        s = visitor.context().ExportObj(opts_.obj_output);
-      }
       if (s.ok() && opts_.json_output.size() > 0) {
         JsonDumper dumper(opts_.json_output, &env_);
         FrontEnv::root->Invoke(dumper);
         s = dumper.status();
+      }
+      if (opts_.ir_output.size() > 0 || opts_.obj_output.size() > 0) {
+        SyntaxVisitor visitor(&env_);
+        FrontEnv::root->Invoke(visitor);
+        s = visitor.status();
+        if (s.ok() && opts_.ir_output.size() > 0) {
+          s = visitor.context().ExportIR(opts_.ir_output);
+        }
+        if (s.ok() && opts_.obj_output.size() > 0) {
+          s = visitor.context().ExportObj(opts_.obj_output);
+        }  
       }
   	}
   	return s;

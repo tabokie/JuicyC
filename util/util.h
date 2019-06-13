@@ -156,6 +156,9 @@ struct StringUtil {
 class Logger {
 
  public:
+  ~Logger() {
+    output_error(std::cout);
+  }
   void trace(std::string context) {
     trace_buffer_[head_++] = context;
     if (head_ >= trace_buffer_size_) head_ = 0;
