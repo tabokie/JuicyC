@@ -25,7 +25,7 @@ all: gen unittest build
 .PHONY : all
 
 build:
-  $(CC) /Fejuicyc.exe $(INCLUDE_FLAG) $(SRC) $(CMD) $(FLAG)
+  $(CC) /Fejuicyc.exe $(INCLUDE_FLAG) $(LLVM_LIB) $(SRC) $(CMD) $(FLAG)
 .PHONY : build
 
 unittest:
@@ -52,4 +52,7 @@ clean:
   $(SHELL_DEL) *.exe
   $(SHELL_DEL) *.obj
   $(SHELL_DEL) *.o
+  $(SHELL_DEL) *.ll
+  $(SHELL_DEL) *.json
+  $(SHELL_DEL) *.s
 .PHONY : clean

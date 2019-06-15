@@ -51,13 +51,9 @@ struct Context {
     // llvm::raw_os_ostream dest(*env->fopen("out.ir"));
     // llvm::raw_fd_ostream dest("out.ir", ec, llvm::sys::fs::F_None);
     auto os = env->output_system()->fopen(filename);
-    std::cout << __LINE__ << std::endl;
     llvm::raw_os_ostream dest(*os);
-    std::cout << __LINE__ << std::endl;
     module->print(dest, nullptr);
-    std::cout << __LINE__ << std::endl;
     dest.flush();
-    std::cout << __LINE__ << std::endl;
     env->output_system()->fclose(os);
     return Status::OK();
   }
@@ -93,7 +89,6 @@ struct Context {
       return Status::IOError("file type failed");
     }
     pass.run(*module);
-	std::cout << "after pass run" << std::endl;
     dest.flush();
     // env->output_system()->fclose(os);
     return Status::OK();

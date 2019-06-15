@@ -40,15 +40,21 @@ struct FunctionGuard {
   FunctionGuard(std::ostream& os, const char* name)
       : os_(os),
         name_(name) {
+   #ifdef JUICYC_DEBUG
     os_ << "entering " << name_ << std::endl;
+   #endif
   }
   FunctionGuard(std::ostream& os, const std::string name)
       : os_(os),
         name_(name) {
+   #ifdef JUICYC_DEBUG
     os_ << "entering " << name_ << std::endl;
+   #endif
   }
   ~FunctionGuard() {
+   #ifdef JUICYC_DEBUG
     os_ << "exiting " << name_ << std::endl;
+   #endif
   }
  private:
   std::ostream& os_;

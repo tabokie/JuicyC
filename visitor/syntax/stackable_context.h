@@ -10,6 +10,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <iostream>
 
 namespace juicyc {
 namespace syntax {
@@ -68,6 +69,10 @@ class FunctionTable {
     std::string tag = checker_->Tag(args);
     auto& v = table_[name];
     for (auto& f : v) {
+      if (f->varargs) {
+        ret = f;
+        return Status::OK();
+      }
       if (f->tag == tag) {
         ret = f;
         return Status::OK();
@@ -112,6 +117,8 @@ struct StackableContext {
 
   IdentifierTable identifier;
   FunctionTable function;
+
+  bool sticky = false;
 
   StackableContext(TypeChecker* checker) : function(checker) {}
   ~StackableContext() {}

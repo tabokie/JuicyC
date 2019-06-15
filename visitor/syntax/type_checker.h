@@ -31,10 +31,21 @@ class TypeChecker {
     if (p == llvm_type_string_map_.end()) return nullptr;
     return std::make_shared<InternalType>(p->second(context_->llvm));
   }
+  InternalTypePtr FromRaw(llvm::Type* type) {
+    if (!type) return nullptr;
+    if (type->isPointerTy()) {
+      auto p = FromRaw(type->getContainedType(0));
+      return p->pointer();
+    } else {
+      return std::make_shared<InternalType>(type);
+    }
+  }
   // type cast is only applied on raw value and type
   llvm::Value* CastTo(llvm::Value* value, llvm::Type* to, bool _explicit = true) {
     llvm::Type* from = value->getType();
     if (from == to) return value;
+    InternalType tmp(from);
+    InternalType tmp2(to);
     if (_explicit) {
       // cross cast
       if (from->isPointerTy() && to->isPointerTy()) {
@@ -58,14 +69,17 @@ class TypeChecker {
     }
     llvm::Type::TypeID from_id = from->getTypeID();
     llvm::Type::TypeID to_id = to->getTypeID();
-    if (from_id == llvm::Type::IntegerTyID) {
+    if (from_id == llvm::Type::IntegerTyID && to_id == llvm::Type::IntegerTyID) {
       return context_->builder.CreateSExtOrTrunc(value, to);
     } else if(from_id == llvm::Type::FloatTyID) {
       if (to_id == llvm::Type::DoubleTyID)
         return context_->builder.CreateFPExt(value, to);
       else
         return context_->builder.CreateFPTrunc(value, to);
+    } else if (from_id == llvm::Type::IntegerTyID) {
+      return context_->builder.CreateIntCast(value, to, true);
     }
+    return nullptr;
   }
   llvm::Value* CastToBoolean(llvm::Value* value) {
     llvm::Type* type = value->getType();
@@ -91,7 +105,11 @@ class TypeChecker {
     return false;
   }
   std::string Tag(const std::vector<InternalTypePtr>& args) {
-    return "";
+    std::string ret;
+    for (auto& t : args) {
+      ret += std::string(".") + t->ToString();
+    }
+    return ret;
   }
  private:
   Context* context_ = nullptr;

@@ -73,13 +73,14 @@ struct FunctionIdentifier {
   std::string tag;
   InternalTypePtr ret = nullptr;
   std::vector<InternalTypePtr> args;
-  llvm::Value* value;
+  llvm::Function* value;
+  bool varargs = false;
   bool closed = false;
 
   FunctionIdentifier(std::string _name,
                      InternalTypePtr _ret,
                      std::vector<InternalTypePtr> _args,
-                     llvm::Value* _value)
+                     llvm::Function* _value)
       : name(_name),
         ret(_ret),
         args(_args),

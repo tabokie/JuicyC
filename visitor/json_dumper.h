@@ -9,6 +9,16 @@
 
 namespace juicyc {
 
+std::string filter(std::string& str) {
+  std::string ret;
+  if (str[0] == '\"') {
+    ret = std::string("\\\"") + str.substr(1,str.size()-2) + std::string("\\\"");
+  } else {
+    return str;
+  }
+  return ret;
+}
+
 class JsonDumper : public SymbolVisitor {
  public:
   JsonDumper(std::string output, Env* env)
@@ -25,7 +35,7 @@ class JsonDumper : public SymbolVisitor {
     (*os_) << std::string(indent_, ' ')
            << "\"terminal-" << (terminal_id_++) << "\": {\n";
     (*os_) << std::string(indent_ + 2, ' ')
-           << "\"value\": \"" << (n->value) << "\",\n";
+           << "\"value\": \"" << filter(n->value) << "\",\n";
     (*os_) << std::string(indent_ + 2, ' ')
            << "\"file\": \"" << (n->file) << "\",\n";
     (*os_) << std::string(indent_ + 2, ' ')
